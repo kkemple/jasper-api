@@ -1,0 +1,5 @@
+{
+  "events": {
+    "restart": "./.bin/lint && ./.bin/test"
+  }
+}
