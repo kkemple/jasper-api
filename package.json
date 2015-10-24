@@ -4,7 +4,7 @@
   "description": "API for skynet, a personal assistant bot",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node index.js | node_modules/.bin/bunyan",
     "test": "./.bin/test",
     "dev": "./.bin/dev",
     "test": "./.bin/test"
