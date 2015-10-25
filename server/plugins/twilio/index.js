@@ -14,8 +14,6 @@ const handler = (request, reply) => {
 
   skynet(request.payload.Body)
     .then((response) => {
-      logger.info(response)
-
       twilio.messages.create({
         to: request.payload.From,
         from: request.payload.To,

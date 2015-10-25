@@ -3,9 +3,7 @@ require('babel/register')
 var server = require('./server')
 
 server.register([
-  {
-    register: require('./server/plugins/twilio')
-  },
+  { register: require('./server/plugins/twilio') },
   {
     register: require('good'),
     options: {
