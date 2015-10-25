@@ -7,33 +7,32 @@ const twilio = twilioFactory(
   process.env.TWILIO_AUTH_TOKEN
 )
 
+const method = 'POST'
+const path = '/twilio/sms'
+const handler = (request, reply) => {
+  logger.info(request.payload.Body)
+
+  skynet(request.payload.Body)
+    .then((response) => {
+      logger.info(response)
+
+      twilio.messages.create({
+        to: request.payload.From,
+        from: request.payload.To,
+        body: response,
+      }, (err) => {
+        if (err) {
+          logger.error(err)
+          return
+        }
+      })
+
+      reply('ok')
+    })
+}
+
 const register = (server, options, next) => {
-  server.route({
-    method: 'POST',
-    path: '/twilio/sms',
-    handler: (request, reply) => {
-      logger.info(request.payload.Body)
-
-      skynet(request.payload.Body)
-        .then((response) => {
-          logger.info(response)
-
-          twilio.messages.create({
-            to: request.payload.From,
-            from: request.payload.To,
-            body: response,
-          }, (err) => {
-            if (err) {
-              logger.error(err)
-              return
-            }
-          })
-
-          reply('ok')
-        })
-    },
-  })
-
+  server.route({ method, path, handler })
   next()
 }
 
