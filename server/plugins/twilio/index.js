@@ -14,11 +14,15 @@ const handler = (request, reply) => {
 
   skynet(request.payload.Body)
     .then((response) => {
-      twilio.messages.create({
+      const messageConfig = {
         to: request.payload.From,
         from: request.payload.To,
-        body: response,
-      }, (err) => {
+        body: response.speech,
+      };
+
+      if (response.mediaUrl) messageConfig.mediaUrl = response.media
+
+      twilio.messages.create(messageConfig, (err) => {
         if (err) {
           logger.error(err)
           return
