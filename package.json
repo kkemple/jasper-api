@@ -32,10 +32,12 @@
     "good": "^6.4.0",
     "good-console": "^5.1.0",
     "googleapis": "^2.1.5",
+    "grant-hapi": "^3.5.1",
     "hapi": "^10.5.0",
     "spotify-web-api-node": "^2.1.0",
     "superagent": "^1.4.0",
-    "twilio": "^2.5.1"
+    "twilio": "^2.5.1",
+    "yar": "^4.2.0"
   },
   "devDependencies": {
     "chai": "^3.3.0",
