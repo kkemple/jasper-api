@@ -10,8 +10,6 @@ const twilio = twilioFactory(
 const method = 'POST'
 const path = '/twilio/sms'
 const handler = (request, reply) => {
-  logger.info(request.payload.Body)
-
   skynet(request.payload.Body)
     .then((response) => {
       const messageConfig = {
@@ -20,7 +18,7 @@ const handler = (request, reply) => {
         body: response.speech,
       };
 
-      if (response.mediaUrl) messageConfig.mediaUrl = response.media
+      if (response.mediaUrl) messageConfig.mediaUrl = response.mediaUrl
 
       twilio.messages.create(messageConfig, (err) => {
         if (err) {

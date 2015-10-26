@@ -6,8 +6,7 @@
   "scripts": {
     "start": "node index.js | node_modules/.bin/bunyan",
     "test": "./.bin/test",
-    "dev": "./.bin/dev",
-    "test": "./.bin/test"
+    "dev": "./.bin/dev"
   },
   "repository": {
     "type": "git",
@@ -32,7 +31,9 @@
     "bunyan": "^1.5.1",
     "good": "^6.4.0",
     "good-console": "^5.1.0",
+    "googleapis": "^2.1.5",
     "hapi": "^10.5.0",
+    "spotify-web-api-node": "^2.1.0",
     "superagent": "^1.4.0",
     "twilio": "^2.5.1"
   },
