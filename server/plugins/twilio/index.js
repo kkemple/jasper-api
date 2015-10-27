@@ -1,5 +1,5 @@
-import skynet from '../../../lib/skynet'
-import logger from '../../../lib/logger'
+import skynet from '../../../skynet'
+import logger from '../../../logger'
 import twilioFactory from 'twilio'
 
 const twilio = twilioFactory(

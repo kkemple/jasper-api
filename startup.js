@@ -1,6 +1,6 @@
 import Grant from 'grant-hapi'
 import grantConfig from './server/config/grant'
-import logger from './lib/logger'
+import logger from './logger'
 import server from './server'
 
 server.register([
