@@ -17,8 +17,31 @@ export default (query) => {
         parseString(response.text, (xmlErr, result) => {
           if (xmlErr) return rej(xmlErr)
 
+          let wikipediaUrl = ''
+          let imageUrl = ''
+          let initialResponse = result.queryresult.pod[1].subpod[0].plaintext
+
+          result.queryresult.pod.forEach((pod) => {
+            if (pod.$.title === 'Wikipedia summary') {
+              logger.info(pod, 'pod data')
+              wikipediaUrl = pod.infos[0].info[0].link[0].$.url
+            }
+
+            if (pod.$.title === 'Image') {
+              imageUrl = pod.subpod[0].img[0].$.src
+            }
+          })
+
+          if (wikipediaUrl) {
+            initialResponse = `${initialResponse}\nwikipedia | ${wikipediaUrl}`
+          }
+
+          const respObj = { speech: initialResponse }
+
+          if (imageUrl) respObj.mediaUrl = imageUrl
+
           logger.info(result.queryresult.pod, 'wolfram alpha response')
-          res({ speech: result.queryresult.pod[1].subpod[0].plaintext })
+          res(respObj)
         })
       })
   })

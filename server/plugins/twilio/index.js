@@ -1,6 +1,7 @@
+import twilioFactory from 'twilio'
+
 import skynet from '../../../skynet'
 import logger from '../../../logger'
-import twilioFactory from 'twilio'
 
 const twilio = twilioFactory(
   process.env.TWILIO_ACCOUNT_SID,
