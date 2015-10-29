@@ -23,7 +23,6 @@ export default (query) => {
 
           result.queryresult.pod.forEach((pod) => {
             if (pod.$.title === 'Wikipedia summary') {
-              logger.info(pod, 'pod data')
               wikipediaUrl = pod.infos[0].info[0].link[0].$.url
             }
 
