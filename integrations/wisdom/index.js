@@ -1,5 +1,7 @@
 import Promise from 'bluebird'
 
+import astronomy from './astronomy'
+
 export default {
   actors: (speech) => {
     return Promise.resolve({ speech })
@@ -13,9 +15,7 @@ export default {
   artists: (speech) => {
     return Promise.resolve({ speech })
   },
-  astronomy: (speech) => {
-    return Promise.resolve({ speech })
-  },
+  astronomy: astronomy,
   biology: (speech) => {
     return Promise.resolve({ speech })
   },

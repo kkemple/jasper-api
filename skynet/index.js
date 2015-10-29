@@ -17,11 +17,14 @@ const processCommand = (err, response, res, rej) => {
 
   if (err) return rej(err)
 
+  logger.info(response.body, 'api.ai response')
+
   const speech = response.body.result.speech
   if (response.body.result.action === '' && speech !== '') return res({ speech })
 
   const commands = response.body.result.action.split('.')
   const params = response.body.result.parameters
+  const result = response.body.result
 
   const action = commands.reduce((prev, curr, index) => {
     if (!prev && index > 0) return undefined
@@ -31,7 +34,7 @@ const processCommand = (err, response, res, rej) => {
 
   if (!action) return res(unableToProcess)
 
-  action(speech, params)
+  action(speech, params, result)
     .then((config) => res(config))
     .catch((fulfillmentErr) => rej(fulfillmentErr))
 };

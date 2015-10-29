@@ -1,5 +1,7 @@
 import Promise from 'bluebird'
 
+import wolframAlpha from '../../wolfram-alpha'
+
 export default {
   currency: (speech) => {
     return Promise.resolve({ speech })
@@ -9,5 +11,8 @@ export default {
   },
   tips: (speech) => {
     return Promise.resolve({ speech })
+  },
+  units: (speech, params, body) => {
+    return wolframAlpha(body.resolvedQuery)
   },
 }

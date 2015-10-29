@@ -1,42 +1,12 @@
-import Grant from 'grant-hapi'
-import grantConfig from './server/config/grant'
 import logger from './logger'
 import server from './server'
+import serverConfig from './server/config/server'
 
-server.register([
-  {
-    register: require('good'),
-    options: {
-      reporters: [
-        {
-          reporter: require('good-console'),
-          events: { log: '*', response: '*' },
-        },
-      ],
-    },
-  },
-  {
-    register: new Grant(),
-    options: grantConfig,
-  },
-  {
-    register: require('./server/plugins/twilio'),
-  },
-  {
-    register: require('./server/plugins/oauth'),
-  },
-], (err) => {
-  if (err) {
-    logger.error(err)
-    return
-  }
+server.register(serverConfig, (err) => {
+  if (err) return logger.error(err)
 
   server.start((startErr) => {
-    if (startErr) {
-      logger.error(startErr)
-      return
-    }
-
+    if (startErr) return logger.error(startErr)
     logger.info('server started')
   })
 })
