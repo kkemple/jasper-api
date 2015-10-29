@@ -1,4 +1,5 @@
 import calculator from './calculator'
+import finance from './finance'
 import input from './input'
 import maps from './maps'
 import music from './music'
@@ -11,6 +12,7 @@ import wisdom from './wisdom'
 
 export default {
   calculator,
+  finance,
   input,
   maps,
   media: { music },
