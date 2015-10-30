@@ -27,6 +27,7 @@ export default {
   math: wolframResponse,
   movies: wolframResponse,
   namemeaning: wolframResponse,
+  object: wolframResponse,
   painters: wolframResponse,
   paintings: wolframResponse,
   person: wolframResponse,

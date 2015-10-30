@@ -16,10 +16,18 @@ export default (query) => {
 
         parseString(response.text, (xmlErr, result) => {
           if (xmlErr) return rej(xmlErr)
+          if (result.queryresult.$.success === 'false') {
+            return res({ speech: '' })
+          }
 
           let wikipediaUrl = ''
           let imageUrl = ''
-          let initialResponse = result.queryresult.pod[1].subpod[0].plaintext
+          let initialResponse = result.queryresult.pod[1].subpod[0].plaintext[0]
+
+          if (initialResponse === '') {
+            initialResponse = 'Here is an image.'
+            imageUrl = result.queryresult.pod[1].subpod[0].img[0].$.src
+          }
 
           result.queryresult.pod.forEach((pod) => {
             if (pod.$.title === 'Wikipedia summary') {

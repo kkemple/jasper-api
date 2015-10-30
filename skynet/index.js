@@ -35,7 +35,10 @@ const processCommand = (err, response, res, rej) => {
   if (!action) return res(unableToProcess)
 
   action(speech, params, result)
-    .then((config) => res(config))
+    .then((config) => {
+      if (config.speech === '') config.speech = unableToProcess
+      res(config)
+    })
     .catch((fulfillmentErr) => rej(fulfillmentErr))
 };
 

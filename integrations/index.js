@@ -1,4 +1,6 @@
 import calculator from './calculator'
+import clock from './clock'
+import entertainment from './entertainment'
 import finance from './finance'
 import input from './input'
 import maps from './maps'
@@ -12,6 +14,8 @@ import wisdom from './wisdom'
 
 export default {
   calculator,
+  clock,
+  entertainment,
   finance,
   input,
   maps,

@@ -1,34 +1,34 @@
-import Promise from 'bluebird'
+import wolframAlpha from '../../wolfram-alpha'
 
 export default {
-  agent: (speech) => {
-    return Promise.resolve({ speech })
+  agent: (speech, params, body) => {
+    return wolframAlpha(body.resolvedQuery)
   },
-  appraisal: (speech) => {
-    return Promise.resolve({ speech })
+  appraisal: (speech, params, body) => {
+    return wolframAlpha(body.resolvedQuery)
   },
-  confirmation: (speech) => {
-    return Promise.resolve({ speech })
+  confirmation: (speech, params, body) => {
+    return wolframAlpha(body.resolvedQuery)
   },
-  dialog: (speech) => {
-    return Promise.resolve({ speech })
+  dialog: (speech, params, body) => {
+    return wolframAlpha(body.resolvedQuery)
   },
-  emotions: (speech) => {
-    return Promise.resolve({ speech })
+  emotions: (speech, params, body) => {
+    return wolframAlpha(body.resolvedQuery)
   },
-  greetings: (speech) => {
-    return Promise.resolve({ speech })
+  greetings: (speech, params, body) => {
+    return wolframAlpha(body.resolvedQuery)
   },
-  person: (speech) => {
-    return Promise.resolve({ speech })
+  person: (speech, params, body) => {
+    return wolframAlpha(body.resolvedQuery)
   },
-  topics: (speech) => {
-    return Promise.resolve({ speech })
+  topics: (speech, params, body) => {
+    return wolframAlpha(body.resolvedQuery)
   },
-  unknown: (speech) => {
-    return Promise.resolve({ speech })
+  unknown: (speech, params, body) => {
+    return wolframAlpha(body.resolvedQuery)
   },
-  user: (speech) => {
-    return Promise.resolve({ speech })
+  user: (speech, params, body) => {
+    return wolframAlpha(body.resolvedQuery)
   },
 }
