@@ -4,7 +4,7 @@ import entertainment from './entertainment'
 import finance from './finance'
 import input from './input'
 import maps from './maps'
-import music from './music'
+import media from './media'
 import name from './name'
 import news from './news'
 import smalltalk from './small-talk'
@@ -21,7 +21,7 @@ export default {
   finance,
   input,
   maps,
-  media: { music },
+  media,
   name,
   news,
   smalltalk,

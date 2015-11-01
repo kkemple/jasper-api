@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js | node_modules/.bin/bunyan",
-    "test": "./.bin/test",
+    "test": "node_modules/.bin/mocha --compilers js:babel-core/register",
     "dev": "./.bin/dev"
   },
   "repository": {
@@ -27,6 +27,7 @@
   "homepage": "https://github.com/kkemple/skynet-api#readme",
   "dependencies": {
     "babel": "^5.8.23",
+    "babel-core": "^6.0.12",
     "bluebird": "^2.10.2",
     "bookshelf": "^0.8.2",
     "bunyan": "^1.5.1",
@@ -43,7 +44,11 @@
     "xml2js": "^0.4.13"
   },
   "devDependencies": {
+    "babel-eslint": "^4.1.3",
     "chai": "^3.3.0",
+    "eslint": "^1.7.3",
+    "eslint-config-airbnb": "^0.1.0",
+    "eslint-plugin-react": "^3.6.3",
     "mocha": "^2.3.3",
     "nodemon": "^1.7.1",
     "sinon": "^1.17.1"
