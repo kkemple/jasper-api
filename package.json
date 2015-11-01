@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js | node_modules/.bin/bunyan",
-    "test": "node_modules/.bin/mocha --compilers js:babel-core/register",
+    "test": "node_modules/.bin/mocha ./test/spec --compilers js:babel-core/register",
     "dev": "./.bin/dev"
   },
   "repository": {
