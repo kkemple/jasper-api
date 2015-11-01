@@ -1,6 +1,6 @@
 import logger from '../../../logger'
 
-const register = (server, options, next) => {
+exports.register = (server, options, next) => {
   server.route([
     {
       method: 'GET',
@@ -63,9 +63,7 @@ const register = (server, options, next) => {
   next()
 }
 
-register.attributes = {
+exports.register.attributes = {
   name: 'oauth',
   version: '1.0.0',
 }
-
-export default { register }
