@@ -1,6 +1,3 @@
-import Grant from 'grant-hapi'
-import grantConfig from './grant'
-
 export default [
   {
     register: require('good'),
@@ -12,10 +9,6 @@ export default [
         },
       ],
     },
-  },
-  {
-    register: new Grant(),
-    options: grantConfig,
   },
   {
     register: require('../plugins/twilio'),

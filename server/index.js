@@ -1,6 +1,12 @@
 const Hapi = require('hapi')
 
-const server = new Hapi.Server()
+const server = new Hapi.Server({
+  connections: {
+    routes: {
+      cors: true,
+    },
+  },
+})
 
 server.connection({
   host: process.env.HOST,

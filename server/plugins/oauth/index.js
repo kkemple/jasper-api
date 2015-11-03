@@ -1,10 +1,32 @@
 import logger from '../../../logger'
 
+import request from 'superagent'
+
 exports.register = (server, options, next) => {
   server.route([
     {
       method: 'GET',
-      path: '/connect/spotify/callback',
+      path: '/oauth/spotify',
+      handler: (req, reply) => {
+        const { code, grant_type, redirect_uri } = req.payload
+        const clientId = process.env.SPOTIFY_CLIENT_ID
+        const clientSecret = process.env.SPOTIFY_CLIENT_SECRET
+
+        request
+          .post('https://accounts.spotify.com/api/token')
+          .send({
+            code,
+            grant_type,
+            redirect_uri,
+            client_id: clientId,
+            client_secret: clientSecret,
+          })
+          .end((err, response) => reply(response.body))
+      },
+    },
+    {
+      method: 'GET',
+      path: '/oauth/facebook',
       handler: (req, reply) => {
         logger.info(req.query)
         reply(JSON.stringify(req.query))
@@ -12,7 +34,7 @@ exports.register = (server, options, next) => {
     },
     {
       method: 'GET',
-      path: '/connect/facebook/callback',
+      path: '/oauth/twitter',
       handler: (req, reply) => {
         logger.info(req.query)
         reply(JSON.stringify(req.query))
@@ -20,7 +42,7 @@ exports.register = (server, options, next) => {
     },
     {
       method: 'GET',
-      path: '/connect/twitter/callback',
+      path: '/oauth/uber',
       handler: (req, reply) => {
         logger.info(req.query)
         reply(JSON.stringify(req.query))
@@ -28,7 +50,7 @@ exports.register = (server, options, next) => {
     },
     {
       method: 'GET',
-      path: '/connect/uber/callback',
+      path: '/oauth/airbnb',
       handler: (req, reply) => {
         logger.info(req.query)
         reply(JSON.stringify(req.query))
@@ -36,7 +58,7 @@ exports.register = (server, options, next) => {
     },
     {
       method: 'GET',
-      path: '/connect/airbnb/callback',
+      path: '/oauth/nest',
       handler: (req, reply) => {
         logger.info(req.query)
         reply(JSON.stringify(req.query))
@@ -44,15 +66,7 @@ exports.register = (server, options, next) => {
     },
     {
       method: 'GET',
-      path: '/connect/nest/callback',
-      handler: (req, reply) => {
-        logger.info(req.query)
-        reply(JSON.stringify(req.query))
-      },
-    },
-    {
-      method: 'GET',
-      path: '/connect/pandora/callback',
+      path: '/oauth/pandora',
       handler: (req, reply) => {
         logger.info(req.query)
         reply(JSON.stringify(req.query))
