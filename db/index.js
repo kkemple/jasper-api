@@ -1,5 +1,5 @@
-import bookshelfFactory from 'bookshelf';
-import knexFactory from 'knex';
+import bookshelfFactory from 'bookshelf'
+import knexFactory from 'knex'
 
 const knex = knexFactory({
   client: 'pg',
@@ -10,8 +10,9 @@ const knex = knexFactory({
     password: process.env.DATABASE_ACCESS_KEY,
     database: process.env.DATABASE_NAME,
   },
-});
+})
 
-const bookshelf = bookshelfFactory(knex);
+const bookshelf = bookshelfFactory(knex)
+bookshelf.plugin('registry')
 
-export default bookshelf;
+export default bookshelf
