@@ -12,16 +12,37 @@ exports.register = (server, options, next) => {
         const clientId = process.env.SPOTIFY_CLIENT_ID
         const clientSecret = process.env.SPOTIFY_CLIENT_SECRET
 
+        const data = {
+          code,
+          grant_type,
+          redirect_uri,
+          client_id: clientId,
+          client_secret: clientSecret,
+        }
+
+        logger.info(data, 'spotify data')
+
         request
           .post('https://accounts.spotify.com/api/token')
-          .send({
-            code,
-            grant_type,
-            redirect_uri,
-            client_id: clientId,
-            client_secret: clientSecret,
+          .type('form')
+          .send(data)
+          .end((err, response) => {
+            if (err) {
+              logger.error(err, 'spotify token error')
+              reply({
+                status: 'error',
+                timestamp: Date.now(),
+                error: err,
+              })
+              return
+            }
+
+            reply({
+              status: 'ok',
+              timestamp: Date.now(),
+              payload: response.body,
+            })
           })
-          .end((err, response) => reply(response.body))
       },
     },
     {
