@@ -1,1 +1,3 @@
 index.js
+db/migrations
+db/seeds
