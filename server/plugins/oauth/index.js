@@ -5,7 +5,7 @@ import request from 'superagent'
 exports.register = (server, options, next) => {
   server.route([
     {
-      method: 'GET',
+      method: 'POST',
       path: '/oauth/spotify',
       handler: (req, reply) => {
         const { code, grant_type, redirect_uri } = req.payload
@@ -25,7 +25,7 @@ exports.register = (server, options, next) => {
       },
     },
     {
-      method: 'GET',
+      method: 'POST',
       path: '/oauth/facebook',
       handler: (req, reply) => {
         logger.info(req.query)
@@ -33,7 +33,7 @@ exports.register = (server, options, next) => {
       },
     },
     {
-      method: 'GET',
+      method: 'POST',
       path: '/oauth/twitter',
       handler: (req, reply) => {
         logger.info(req.query)
@@ -41,7 +41,7 @@ exports.register = (server, options, next) => {
       },
     },
     {
-      method: 'GET',
+      method: 'POST',
       path: '/oauth/uber',
       handler: (req, reply) => {
         logger.info(req.query)
@@ -49,7 +49,7 @@ exports.register = (server, options, next) => {
       },
     },
     {
-      method: 'GET',
+      method: 'POST',
       path: '/oauth/airbnb',
       handler: (req, reply) => {
         logger.info(req.query)
@@ -57,7 +57,7 @@ exports.register = (server, options, next) => {
       },
     },
     {
-      method: 'GET',
+      method: 'POST',
       path: '/oauth/nest',
       handler: (req, reply) => {
         logger.info(req.query)
@@ -65,7 +65,7 @@ exports.register = (server, options, next) => {
       },
     },
     {
-      method: 'GET',
+      method: 'POST',
       path: '/oauth/pandora',
       handler: (req, reply) => {
         logger.info(req.query)
