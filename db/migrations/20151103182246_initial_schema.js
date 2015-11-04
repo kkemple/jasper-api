@@ -5,7 +5,7 @@ exports.up = function(knex, Promise) {
       t.increments('id').primary()
       t.text('email').notNullable().unique()
       t.text('password').notNullable()
-      t.boolean('active').defaultTo(false)
+      t.boolean('active').defaultTo(true)
       t.text('stripe_id')
       t.json('extra_data', true)
       t.timestamps()
@@ -13,14 +13,13 @@ exports.up = function(knex, Promise) {
     .createTable('bots', function (t) {
       t.increments('id').primary()
       t.integer('user_id').notNullable().references('users.id')
-      t.boolean('active').defaultTo(false)
+      t.boolean('active').defaultTo(true)
       t.text('phone_number')
       t.json('extra_data', true)
       t.timestamps()
     })
     .createTable('integrations', function (t) {
       t.increments('id').primary()
-      t.integer('user_id').notNullable().references('users.id')
       t.integer('bot_id').notNullable().references('bots.id')
       t.text('type').notNullable()
       t.text('access_token').notNullable()
@@ -32,7 +31,6 @@ exports.up = function(knex, Promise) {
     })
     .createTable('emails', function (t) {
       t.increments('id').primary()
-      t.integer('user_id').notNullable().references('users.id')
       t.integer('bot_id').notNullable().references('bots.id')
       t.boolean('active').defaultTo(true)
       t.text('email').notNullable()

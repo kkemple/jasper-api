@@ -17,7 +17,7 @@ const handler = (request, reply) => {
         to: request.payload.From,
         from: request.payload.To,
         body: response.speech,
-      };
+      }
 
       if (response.mediaUrl) messageConfig.mediaUrl = response.mediaUrl
 

@@ -9,7 +9,7 @@ const apiAiBaseUrl = 'https://api.api.ai/v1/query'
 const apiAiHeaders = {
   'Authorization': `Bearer ${process.env.API_AI_ACCESS_TOKEN}`,
   'ocp-apim-subscription-key': `${process.env.API_AI_SUBSCRIPTION_KEY}`,
-};
+}
 
 // this needs more structure, need to discover the data model behind a command
 const processCommand = (err, response, res, rej) => {
@@ -26,10 +26,10 @@ const processCommand = (err, response, res, rej) => {
   const params = response.body.result.parameters
   const result = response.body.result
 
-  const action = commands.reduce((prev, curr, index) => {
-    if (!prev && index > 0) return undefined
-    if (!prev) return integrations[curr]
-    return prev[curr]
+  const action = commands.reduce((memo, val, index) => {
+    if (!memo && index > 0) return undefined
+    if (!memo) return integrations[val]
+    return memo[val]
   }, undefined)
 
   if (!action) return res(unableToProcess)

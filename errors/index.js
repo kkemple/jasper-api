@@ -11,3 +11,5 @@ export class AuthenticationError extends ExtendableError {
     super(message)
   }
 }
+
+export default ExtendableError

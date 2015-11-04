@@ -3,7 +3,7 @@ import Joi from 'joi'
 import jwt from 'jsonwebtoken'
 import Promise from 'bluebird'
 
-import db from '../db'
+import orm from '../db'
 import { userValidation } from '../validations'
 import { AuthenticationError } from '../errors'
 
@@ -75,4 +75,4 @@ const virtuals = {
   },
 }
 
-export default db.Model.extend(config, virtuals)
+export default orm.Model.extend(config, virtuals)

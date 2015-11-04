@@ -1,4 +1,4 @@
-import db from '../db'
+import orm from '../db'
 
 const config = {
   tableName: 'integrations',
@@ -9,10 +9,6 @@ const config = {
 
   validateSave() {},
 
-  user() {
-    return this.belongsTo('User')
-  },
-
   bot() {
     return this.belongsTo('Bot')
   },
@@ -22,4 +18,4 @@ const virtuals = {
 
 }
 
-export default db.Model.extend(config, virtuals)
+export default orm.Model.extend(config, virtuals)

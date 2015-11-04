@@ -1,17 +1,13 @@
-import db from '../db'
+import orm from '../db'
 
 const config = {
   tableName: 'emails',
 
   initialize() {
-    this.on('saving', this.validateSave)
+    this.on('saving', this.validate)
   },
 
-  validateSave() {},
-
-  user() {
-    return this.belongsTo('User')
-  },
+  validate() {},
 
   bot() {
     return this.belongsTo('Bot')
@@ -22,4 +18,4 @@ const virtuals = {
 
 }
 
-export default db.Model.extend(config, virtuals)
+export default orm.Model.extend(config, virtuals)
