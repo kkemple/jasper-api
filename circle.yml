@@ -1,0 +1,13 @@
+machine:
+  node:
+    version: 5.0.0
+  services:
+    - postgresql
+  environment:
+    DATABASE_NAME: circle_test
+    DATABASE_USER: ubuntu
+
+database:
+  post:
+    - node_modules/.bin/knex migrate:latest --env test
+    - node_modules/.bin/knex seed:run --env test
