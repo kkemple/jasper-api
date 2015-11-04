@@ -1,4 +1,4 @@
-var timestamp = timestamp
+var timestamp = Date.now()
 
 exports.seed = function(knex, Promise) {
   return knex('integrations').del()
@@ -18,6 +18,7 @@ exports.seed = function(knex, Promise) {
       return knex('bots').insert({
         id: 1,
         user_id: 1,
+        name: 'test-bot',
         phone_number: '+15555555555',
         created_at: timestamp,
         updated_at: timestamp,
