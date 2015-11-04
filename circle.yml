@@ -7,10 +7,6 @@ machine:
     DATABASE_NAME: circle_test
     DATABASE_USER: ubuntu
 
-dependencies:
-  pre:
-    - npm update node-gyp -g
-
 database:
   post:
     - node_modules/.bin/knex migrate:latest --env test

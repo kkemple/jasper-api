@@ -1,7 +1,3 @@
-var bcrypt = require('bcrypt')
-
-var salt = bcrypt.genSaltSync(10)
-
 exports.seed = function(knex, Promise) {
   return knex('integrations').del()
     .then(function() { return knex('emails').del(); })
@@ -11,7 +7,7 @@ exports.seed = function(knex, Promise) {
       return knex('users').insert({
         id: 1,
         email: 'skynet@releasable.io',
-        password: bcrypt.hashSync('skynet', salt),
+        password: '$2a$10$aSPMLUo7s/fzJzpcoGQ4ce4Twqp/7ljgkM.cAe5N/tXoE55m8qgzS',
       })
     })
     .then(function() {
