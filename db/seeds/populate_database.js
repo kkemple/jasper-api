@@ -1,4 +1,4 @@
-var timestamp = Date.now()
+var timestamp = new Date()
 
 exports.seed = function(knex, Promise) {
   return knex('integrations').del()
