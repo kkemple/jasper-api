@@ -2,7 +2,7 @@ import logger from '../../../logger'
 
 import request from 'superagent'
 
-exports.register = (server, options, next) => {
+export const register = (server, options, next) => {
   server.route([
     {
       method: 'POST',
@@ -98,7 +98,7 @@ exports.register = (server, options, next) => {
   next()
 }
 
-exports.register.attributes = {
+register.attributes = {
   name: 'oauth',
   version: '1.0.0',
 }

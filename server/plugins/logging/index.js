@@ -7,7 +7,7 @@ function logEvent(name, data) {
   })
 }
 
-exports.register = (server, options, next) => {
+export const register = (server, options, next) => {
   server.ext('onPreHandler', (request, reply) => {
     logEvent('request query', request.query)
     logEvent('request payload', request.payload)
@@ -18,7 +18,7 @@ exports.register = (server, options, next) => {
   next()
 }
 
-exports.register.attributes = {
+register.attributes = {
   name: 'logging',
   version: '1.0.0',
 }

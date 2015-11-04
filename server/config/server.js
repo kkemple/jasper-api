@@ -1,22 +1,22 @@
-export default [
-  {
-    register: require('good'),
-    options: {
-      reporters: [
-        {
-          reporter: require('good-console'),
-          events: { log: '*', response: '*' },
-        },
-      ],
+const goodOptions = {
+  reporters: [
+    {
+      reporter: require('good-console'),
+      events: { log: '*', response: '*' },
     },
+  ],
+}
+
+const apiOptions = {
+  routes: {
+    prefix: '/api',
   },
-  {
-    register: require('../plugins/twilio'),
-  },
-  {
-    register: require('../plugins/oauth'),
-  },
-  {
-    register: require('../plugins/logging'),
-  },
+}
+
+export default [
+  { register: require('good'), options: goodOptions },
+  { register: require('../plugins/twilio') },
+  { register: require('../plugins/oauth') },
+  { register: require('../plugins/logging') },
+  { register: require('../plugins/api'), options: apiOptions },
 ]

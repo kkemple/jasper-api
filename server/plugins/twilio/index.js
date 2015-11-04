@@ -32,12 +32,12 @@ const handler = (request, reply) => {
     })
 }
 
-exports.register = (server, options, next) => {
+export const register = (server, options, next) => {
   server.route({ method, path, handler })
   next()
 }
 
-exports.register.attributes = {
+register.attributes = {
   name: 'twilio',
   version: '1.0.0',
 }

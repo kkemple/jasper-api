@@ -4,8 +4,8 @@ exports.up = function(knex, Promise) {
     createTable('users', function (t) {
       t.increments('id').primary()
       t.text('email').notNullable().unique()
+      t.text('password').notNullable()
       t.boolean('active').defaultTo(false)
-      t.text('api_token')
       t.text('stripe_id')
       t.json('extra_data', true)
       t.timestamps()
