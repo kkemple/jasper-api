@@ -62,7 +62,7 @@ export const register = (server, options, next) => {
     },
     {
       method: 'GET',
-      path: '/api/profile/{id}',
+      path: '/api/users/{id}',
       handler(req, reply) {
         verifyToken(req)
           .then((decoded) => getUser(req.params.id, decoded.email))
