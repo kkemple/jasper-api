@@ -14,6 +14,7 @@ exports.up = function(knex, Promise) {
       t.increments('id').primary()
       t.integer('user_id').notNullable().references('users.id')
       t.boolean('active').defaultTo(true)
+      t.text('name')
       t.text('phone_number')
       t.json('extra_data', true)
       t.timestamps()
