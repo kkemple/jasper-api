@@ -1,4 +1,4 @@
 #! /bin/bash
 
-node_modules/.bin/knex migrate:latest --env production && \
+export NODE_ENV=production
 node index.js | node_modules/.bin/bunyan

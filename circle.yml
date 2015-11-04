@@ -6,8 +6,9 @@ machine:
   environment:
     DATABASE_NAME: circle_test
     DATABASE_USER: ubuntu
+    NODE_ENV: test
 
 database:
   post:
-    - node_modules/.bin/knex migrate:latest --env test
-    - node_modules/.bin/knex seed:run --env test
+    - node_modules/.bin/knex migrate:latest
+    - node_modules/.bin/knex seed:run
