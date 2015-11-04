@@ -4,9 +4,9 @@
   "description": "API for skynet, a personal assistant bot",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js | node_modules/.bin/bunyan",
-    "test": "node_modules/.bin/mocha ./test/spec --compilers js:babel-core/register",
-    "dev": "./.bin/dev"
+    "start": "bin/start",
+    "test": "bin/test",
+    "dev": ".bin/dev"
   },
   "repository": {
     "type": "git",
