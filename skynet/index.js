@@ -1,7 +1,7 @@
 import Promise from 'bluebird'
 import request from 'superagent'
 
-import integrations from '../integrations'
+import domains from './domains'
 import logger from '../logger'
 
 const apiAiBaseUrl = 'https://api.api.ai/v1/query'
@@ -28,7 +28,7 @@ const processCommand = (err, response, res, rej) => {
 
   const action = commands.reduce((memo, val, index) => {
     if (!memo && index > 0) return undefined
-    if (!memo) return integrations[val]
+    if (!memo) return domains[val]
     return memo[val]
   }, undefined)
 

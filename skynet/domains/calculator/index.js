@@ -1,6 +1,6 @@
 import Promise from 'bluebird'
 
-import wolframAlpha from '../../wolfram-alpha'
+import wolframAlpha from '../../../wolfram-alpha'
 
 export default {
   currency: (speech) => {

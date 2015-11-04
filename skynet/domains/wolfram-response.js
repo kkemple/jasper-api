@@ -1,4 +1,4 @@
-import wolframAlpha from '../wolfram-alpha'
+import wolframAlpha from '../../wolfram-alpha'
 
 export default (speech, params, body) => {
   if (speech === '') return wolframAlpha(body.resolvedQuery)

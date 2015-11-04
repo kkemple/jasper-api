@@ -1,4 +1,4 @@
-import wolframAlpha from '../../wolfram-alpha'
+import wolframAlpha from '../../../wolfram-alpha'
 
 export default {
   agent: (speech, params, body) => {
