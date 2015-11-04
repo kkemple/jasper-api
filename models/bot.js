@@ -26,4 +26,7 @@ const virtuals = {
 
 }
 
-export default orm.Model.extend(config, virtuals)
+const Bot = orm.Model.extend(config, virtuals)
+orm.model('Bot', Bot)
+
+export default Bot

@@ -18,4 +18,7 @@ const virtuals = {
 
 }
 
-export default orm.Model.extend(config, virtuals)
+const Integration = orm.Model.extend(config, virtuals)
+orm.model('Integration', Integration)
+
+export default Integration

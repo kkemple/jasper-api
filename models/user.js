@@ -55,8 +55,8 @@ const virtuals = {
         return
       }
 
-      this({ email: email.toLowerCase().trim() })
-        .fetch({require: true})
+      new this({ email: email.toLowerCase().trim() })
+        .fetch({ require: true })
         .then((user) => {
           bcrypt.compare(password, user.get('password'), (err, same) => {
             if (err || !same) {
@@ -64,9 +64,7 @@ const virtuals = {
               return
             }
 
-            const timestamp = Date.now()
-            const token = jwt.sign({ email, timestamp }, process.env.ENCRYPTION_KEY)
-
+            const token = jwt.sign({ email }, process.env.ENCRYPTION_KEY)
             res(token)
           })
         })
@@ -75,4 +73,7 @@ const virtuals = {
   },
 }
 
-export default orm.Model.extend(config, virtuals)
+const User = orm.Model.extend(config, virtuals)
+orm.model('User', User)
+
+export default User
