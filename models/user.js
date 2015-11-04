@@ -1,33 +1,34 @@
-import bcrypt from 'bcrypt'
+import assign from 'lodash.assign'
+import bcrypt from 'bcryptjs'
 import Joi from 'joi'
 import jwt from 'jsonwebtoken'
 import Promise from 'bluebird'
 
+import { AuthenticationError } from '../errors'
 import orm from '../db'
 import { userValidation } from '../validations'
-import { AuthenticationError } from '../errors'
 
 const validate = (model, attrs) => {
   return Joi.validate(attrs, userValidation)
 }
 
-const hashPassword = (model, attrs) => {
-  return new Promise((res, rej) => {
-    bcrypt.genSalt(10, (saltGenErr, salt) => {
-      if (saltGenErr) return rej(saltGenErr)
+const hashPassword = (model) => new Promise((res, rej) => {
+  bcrypt.genSalt(10, (saltGenErr, salt) => {
+    if (saltGenErr) return rej(saltGenErr)
 
-      bcrypt.hash(attrs.password, salt, (hashErr, hash) => {
-        if (hashErr) return rej(hashErr)
+    bcrypt.hash(model.attributes.password, salt, (hashErr, hash) => {
+      if (hashErr) return rej(hashErr)
 
-        model.set('password', hash)
-        return res(hash)
-      })
+      model.set('password', hash)
+      return res(hash)
     })
   })
-}
+})
 
 const config = {
   tableName: 'users',
+
+  hasTimestamps: true,
 
   initialize() {
     this.on('creating', hashPassword)
@@ -60,16 +61,29 @@ const virtuals = {
         .then((user) => {
           bcrypt.compare(password, user.get('password'), (err, same) => {
             if (err || !same) {
-              rej(new AuthenticationError())
+              rej(new AuthenticationError('Invalid password!'))
               return
             }
 
-            const token = jwt.sign({ email }, process.env.ENCRYPTION_KEY)
+            const token = jwt.sign({
+              email, id: user.get('id'),
+            }, process.env.ENCRYPTION_KEY)
+
             res(token)
           })
         })
-        .catch(() => rej(new AuthenticationError()))
+        .catch((err) => rej(err))
     })
+  },
+
+  profile(id, email) {
+    return new this({ id: id, email: email })
+      .fetch({ required: true, withRelated: 'bots' })
+      .then((user) => assign(
+        {},
+        user.omit(['password', 'stripe_id']),
+        { bots: user.related('bots').toJSON() }
+      ))
   },
 }
 

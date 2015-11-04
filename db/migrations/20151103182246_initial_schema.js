@@ -1,7 +1,7 @@
 
 exports.up = function(knex, Promise) {
   return knex.schema.
-    createTable('users', function (t) {
+    createTable('users', function(t) {
       t.increments('id').primary()
       t.text('email').notNullable().unique()
       t.text('password').notNullable()
@@ -10,7 +10,7 @@ exports.up = function(knex, Promise) {
       t.json('extra_data', true)
       t.timestamps()
     })
-    .createTable('bots', function (t) {
+    .createTable('bots', function(t) {
       t.increments('id').primary()
       t.integer('user_id').notNullable().references('users.id')
       t.boolean('active').defaultTo(true)
@@ -19,18 +19,18 @@ exports.up = function(knex, Promise) {
       t.json('extra_data', true)
       t.timestamps()
     })
-    .createTable('integrations', function (t) {
+    .createTable('integrations', function(t) {
       t.increments('id').primary()
       t.integer('bot_id').notNullable().references('bots.id')
       t.text('type').notNullable()
       t.text('access_token').notNullable()
       t.integer('expires_in')
       t.text('refresh_token')
-      t.boolean('active').defaultsTo(true)
+      t.boolean('active').defaultTo(true)
       t.json('extra_data', true)
       t.timestamps()
     })
-    .createTable('emails', function (t) {
+    .createTable('emails', function(t) {
       t.increments('id').primary()
       t.integer('bot_id').notNullable().references('bots.id')
       t.boolean('active').defaultTo(true)

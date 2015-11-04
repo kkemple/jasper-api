@@ -15,21 +15,19 @@ const getTopTracks = (artist) => {
   return spotify.getArtistTopTracks(artist)
 }
 
-export default (speech, params) => {
-  return new Promise((res, rej) => {
-    if (!apiToken) {
-      getToken()
-        .then((data) => {
-          spotify.setAccessToken(data.body.access_token)
-          getTopTracks(params.artist)
-            .then((tracksData) => res(tracksData))
-            .catch((err) => rej(err))
-          apiToken = true
-        })
-    } else {
-      getTopTracks(params.artist)
-        .then((data) => res(data))
-        .catch((err) => rej(err))
-    }
-  })
-}
+export default (speech, params) => new Promise((res, rej) => {
+  if (!apiToken) {
+    getToken()
+      .then((data) => {
+        spotify.setAccessToken(data.body.access_token)
+        getTopTracks(params.artist)
+          .then((tracksData) => res(tracksData))
+          .catch((err) => rej(err))
+        apiToken = true
+      })
+  } else {
+    getTopTracks(params.artist)
+      .then((data) => res(data))
+      .catch((err) => rej(err))
+  }
+})

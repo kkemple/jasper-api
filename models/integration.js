@@ -3,6 +3,8 @@ import orm from '../db'
 const config = {
   tableName: 'integrations',
 
+  hasTimestamps: true,
+
   initialize() {
     this.on('saving', this.validateSave)
   },

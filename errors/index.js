@@ -12,4 +12,10 @@ export class AuthenticationError extends ExtendableError {
   }
 }
 
+export class CommanderActionNotFoundError extends ExtendableError {
+  constructor(message = 'Action not found!') {
+    super(message)
+  }
+}
+
 export default ExtendableError

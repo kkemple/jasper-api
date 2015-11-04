@@ -12,7 +12,7 @@ export default {
   tips: (speech) => {
     return Promise.resolve({ speech })
   },
-  units: (speech, params, body) => {
-    return wolframAlpha(body.resolvedQuery)
+  units: (speech, params, resolvedQuery) => {
+    return wolframAlpha(resolvedQuery)
   },
 }

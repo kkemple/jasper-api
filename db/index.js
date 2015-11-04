@@ -16,3 +16,5 @@ const bookshelf = bookshelfFactory(knex)
 bookshelf.plugin('registry')
 
 export default bookshelf
+
+process.on('SIGTERM', knex.destroy)

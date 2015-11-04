@@ -1,6 +1,6 @@
 import wolframAlpha from '../../wolfram-alpha'
 
-export default (speech, params, body) => {
-  if (speech === '') return wolframAlpha(body.resolvedQuery)
+export default (speech, params, resolvedQuery) => {
+  if (speech === '') return wolframAlpha(resolvedQuery)
   return Promise.resolve({ speech })
 }

@@ -1,17 +1,18 @@
 import logger from '../../../logger'
 
-function logEvent(name, data) {
-  return new Promise((res) => {
-    logger.info(data, name)
-    res()
-  })
-}
+const logEvent = (name, data) => new Promise((res) => {
+  logger.info(data, name)
+  res()
+})
 
 export const register = (server, options, next) => {
   server.ext('onPreHandler', (request, reply) => {
-    logEvent('request query', request.query)
-    logEvent('request payload', request.payload)
-    logEvent('request parameters', request.params)
+    if (process.env.NODE_ENV !== 'test') {
+      logEvent('request query', request.query)
+      logEvent('request payload', request.payload)
+      logEvent('request parameters', request.params)
+    }
+
     reply.continue()
   })
 

@@ -1,5 +1,5 @@
 import wolframAlpha from '../../../wolfram-alpha'
 
-export default (speech, params, body) => {
-  return wolframAlpha(body.resolvedQuery)
+export default (speech, params, resolvedQuery) => {
+  return wolframAlpha(resolvedQuery)
 }

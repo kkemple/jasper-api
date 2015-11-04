@@ -2,9 +2,9 @@ var timestamp = new Date()
 
 exports.seed = function(knex, Promise) {
   return knex('integrations').del()
-    .then(function() { return knex('emails').del(); })
-    .then(function() { return knex('bots').del(); })
-    .then(function() { return knex('users').del(); })
+    .then(function() { return knex('emails').del() })
+    .then(function() { return knex('bots').del() })
+    .then(function() { return knex('users').del() })
     .then(function() {
       return knex('users').insert({
         id: 1,

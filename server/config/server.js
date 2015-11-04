@@ -1,4 +1,4 @@
-const goodOptions = {
+const goodOptions = process.env.NODE_ENV === 'test' ? {} : {
   reporters: [
     {
       reporter: require('good-console'),
