@@ -1,3 +1,5 @@
+var timestamp = timestamp
+
 exports.seed = function(knex, Promise) {
   return knex('integrations').del()
     .then(function() { return knex('emails').del(); })
@@ -8,6 +10,8 @@ exports.seed = function(knex, Promise) {
         id: 1,
         email: 'skynet@releasable.io',
         password: '$2a$10$aSPMLUo7s/fzJzpcoGQ4ce4Twqp/7ljgkM.cAe5N/tXoE55m8qgzS',
+        created_at: timestamp,
+        updated_at: timestamp,
       })
     })
     .then(function() {
@@ -15,6 +19,8 @@ exports.seed = function(knex, Promise) {
         id: 1,
         user_id: 1,
         phone_number: '+15555555555',
+        created_at: timestamp,
+        updated_at: timestamp,
       })
     })
     .then(function() {
@@ -22,6 +28,8 @@ exports.seed = function(knex, Promise) {
         id: 1,
         bot_id: 1,
         email: 'skynet@releasable.io',
+        created_at: timestamp,
+        updated_at: timestamp,
       })
     })
     .then(function() {
@@ -32,6 +40,8 @@ exports.seed = function(knex, Promise) {
         access_token: 'access_token',
         expires_in: 1000,
         refresh_token: 'refresh_token',
+        created_at: timestamp,
+        updated_at: timestamp,
       })
     })
 }
