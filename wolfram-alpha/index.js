@@ -25,7 +25,7 @@ const parsePod = (arc) => (pod) => {
   const images = []
 
   each(subdata, (sub) => {
-    text += (sub.text !== '') ? `${sub.text}\n---------\n` : ''
+    text += (sub.text.trim() !== '') ? `${sub.text}\n---------\n` : ''
     if (sub.text === '') images.push(sub.image)
   })
 
