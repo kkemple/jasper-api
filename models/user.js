@@ -16,14 +16,22 @@ const hashPassword = (model) => new Promise((res, rej) => {
   bcrypt.genSalt(10, (saltGenErr, salt) => {
     if (saltGenErr) return rej(saltGenErr)
 
-    bcrypt.hash(model.attributes.password, salt, (hashErr, hash) => {
+    bcrypt.hash(model.get('password'), salt, (hashErr, hash) => {
       if (hashErr) return rej(hashErr)
 
       model.set('password', hash)
-      return res(hash)
+      return res()
     })
   })
 })
+
+const convertPassword = (model) => {
+  if (model.hasChanged('password') || model.isNew) {
+    return hashPassword(model)
+  }
+
+  return Promise.resolve()
+}
 
 const config = {
   tableName: 'users',
@@ -31,7 +39,8 @@ const config = {
   hasTimestamps: true,
 
   initialize() {
-    this.on('creating', hashPassword)
+    this.on('creating', convertPassword)
+    this.on('updating', convertPassword)
     this.on('saving', validate)
   },
 

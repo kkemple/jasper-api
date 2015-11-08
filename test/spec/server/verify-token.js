@@ -10,9 +10,8 @@ describe('Hapi Server', () => {
     describe('with a valid access header', () => {
       it('should return the decoded JWT', (done) => {
         const token = jwt.sign({ test: 'test' }, process.env.ENCRYPTION_KEY)
-        const request = { headers: { 'x-access-token': token } }
 
-        verifyToken(request)
+        verifyToken(token)
           .then((decoded) => {
             decoded.test.should.eq('test')
             done()
@@ -24,23 +23,10 @@ describe('Hapi Server', () => {
     describe('with an invalid token', () => {
       it('should return an JsonWebTokenError', (done) => {
         const token = jwt.sign({ test: 'test' }, 'wrong key')
-        const request = { headers: { 'x-access-token': token } }
 
-        verifyToken(request)
+        verifyToken(token)
           .catch((err) => {
             err.name.should.eq('JsonWebTokenError')
-            done()
-          })
-      })
-    })
-
-    describe('with no access header', () => {
-      it('should return an UnauthorizedError', (done) => {
-        const request = { headers: {} }
-
-        verifyToken(request)
-          .catch((err) => {
-            err.name.should.eq('UnauthorizedError')
             done()
           })
       })

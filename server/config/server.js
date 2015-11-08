@@ -7,16 +7,10 @@ const goodOptions = process.env.NODE_ENV === 'test' ? {} : {
   ],
 }
 
-const apiOptions = {
-  routes: {
-    prefix: '/api',
-  },
-}
-
 export default [
   { register: require('good'), options: goodOptions },
   { register: require('../plugins/twilio') },
   { register: require('../plugins/oauth') },
   { register: require('../plugins/logging') },
-  { register: require('../plugins/api'), options: apiOptions },
+  { register: require('../plugins/api/users') },
 ]

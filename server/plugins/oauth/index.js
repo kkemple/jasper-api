@@ -71,7 +71,7 @@ export const register = (server, options, next) => {
       method: 'POST',
       path: '/oauth/spotify',
       handler: (req, reply) => {
-        verifyToken(req)
+        verifyToken(req.headers['x-access-token'])
           .then((decoded) => new User({
             id: decoded.id,
             email: decoded.email,

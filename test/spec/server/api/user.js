@@ -3,15 +3,10 @@ import Hapi from 'hapi'
 import Joi from 'joi'
 import jwt from 'jsonwebtoken'
 
-import {
-  authSuccessSchema,
-  authFailureSchema,
-  userGetSuccessSchema,
-  userGetFailureSchema,
-} from '../../validations'
-import config from '../../../server/config/server'
-import models from '../../../models'
-import { userConfig } from '../../helpers/config'
+import { authSuccessSchema, userGetSuccessSchema } from '../../../validations'
+import config from '../../../../server/config/server'
+import models from '../../../../models'
+import { userConfig } from '../../../helpers/config'
 
 chai.should()
 
@@ -70,24 +65,6 @@ describe('Hapi Server', () => {
       })
 
       describe('with invalid email and password', () => {
-        it('should return with a valid error response', (done) => {
-          server.inject({
-            method: 'POST',
-            url: '/api/authenticate',
-            payload: {
-              email: userModel.get('email'),
-              password: 'incorrect',
-            },
-          }, (res) => {
-            const payload = JSON.parse(res.payload)
-
-            Joi.validate(payload, authFailureSchema, (err) => {
-              if (err) return done(err)
-              done()
-            })
-          })
-        })
-
         it('should return with an AuthenticationError', (done) => {
           server.inject({
             method: 'POST',
@@ -148,28 +125,14 @@ describe('Hapi Server', () => {
       })
 
       describe('with an invalid token', () => {
-        it('should return with a valid error response', (done) => {
+        it('should return with an Bad Request', (done) => {
           server.inject({
             method: 'GET',
             url: '/api/users/1',
           }, (res) => {
             const payload = JSON.parse(res.payload)
 
-            Joi.validate(payload, userGetFailureSchema, (err) => {
-              if (err) return done(err)
-              done()
-            })
-          })
-        })
-
-        it('should return with an UnauthorizedError', (done) => {
-          server.inject({
-            method: 'GET',
-            url: '/api/users/1',
-          }, (res) => {
-            const payload = JSON.parse(res.payload)
-
-            payload.error.should.eq('UnauthorizedError')
+            payload.error.should.eq('Bad Request')
             done()
           })
         })

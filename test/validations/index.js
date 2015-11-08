@@ -8,14 +8,6 @@ export const authSuccessSchema = {
   },
 }
 
-export const authFailureSchema = {
-  success: Joi.boolean().invalid(true).required(),
-  error: Joi.string().required(),
-  message: Joi.string().allow(''),
-  stack: Joi.string().allow(''),
-  timestamp: Joi.date().required(),
-}
-
 export const userGetSuccessSchema = {
   success: Joi.boolean().invalid(false).required(),
   timestamp: Joi.date().required(),
@@ -41,14 +33,6 @@ export const userGetSuccessSchema = {
       ),
     }),
   }),
-}
-
-export const userGetFailureSchema = {
-  success: Joi.boolean().invalid(true).required(),
-  error: Joi.string().required(),
-  message: Joi.string().allow(''),
-  stack: Joi.string().allow(''),
-  timestamp: Joi.date().required(),
 }
 
 export const oauthSuccessSchema = {

@@ -39,7 +39,8 @@ describe('Hapi Server', () => {
             expires_in: 2029,
           })
 
-        new User(userConfig()).save()
+        new User(userConfig())
+          .save()
           .then((savedUser) => {
             userModel = savedUser
             return new Bot(botConfig({ user_id: userModel.get('id') }))
@@ -53,7 +54,8 @@ describe('Hapi Server', () => {
       })
 
       after((done) => {
-        Integration.fetchAll()
+        Integration
+          .fetchAll()
           .then((integrations) => Promise.all(
             integrations.map((int) => int.destroy())
           ))
