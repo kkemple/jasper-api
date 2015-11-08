@@ -36,7 +36,6 @@ describe('Wolfram Alpha', () => {
         .then((response) => {
           response.speech.should.contain('Result')
           response.speech.should.contain('Test')
-          response.images[0].should.eq('http://some.url/and/image/path.jpg')
           done()
         })
     })
