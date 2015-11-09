@@ -8,6 +8,9 @@ chai.should()
 
 const messagesUrl = `/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`
 
+const wolframResponse = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<queryresult success="false"></queryresult>'
+
 describe('Hapi Server', () => {
   let server
 
@@ -32,6 +35,11 @@ describe('Hapi Server', () => {
               parameters: {},
             },
           })
+
+        nock('http://api.wolframalpha.com')
+          .get('/v2/query')
+          .query(true)
+          .reply(200, wolframResponse)
 
         nock('https://api.twilio.com/2010-04-01')
           .post(messagesUrl)

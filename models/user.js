@@ -26,7 +26,7 @@ const hashPassword = (model) => new Promise((res, rej) => {
 })
 
 const convertPassword = (model) => {
-  if (model.hasChanged('password') || model.isNew) {
+  if (model.hasChanged('password') || model.isNew()) {
     return hashPassword(model)
   }
 
@@ -46,14 +46,6 @@ const config = {
 
   bots() {
     return this.hasMany('Bot')
-  },
-
-  integrations() {
-    return this.hasMany('Integration')
-  },
-
-  emails() {
-    return this.hasMany('Email')
   },
 }
 

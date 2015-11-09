@@ -2,70 +2,47 @@ import models from '../../../models'
 import verifyUser from '../../verify-user'
 import verifyToken from '../../verify-token'
 import {
-  authenticationPayload,
   headers,
-  userPostPayload,
-  userParams,
+  botPostPayload,
+  botParams,
 } from '../../../validations'
 
-const { User } = models
+const { Bot } = models
 
-const deleteUser = (token) => {
-  return new User({ id: token.id, email: token.email })
-    .destroy()
+const deleteBot = (bot) => {
+  return bot.destroy()
 }
 
-const patchUser = (token, payload) => {
-  return new User({ id: token.id, email: token.email })
-    .save(payload, { patch: true })
+const patchBot = (bot, payload) => {
+  return bot.save(payload, { patch: true })
 }
 
-const putUser = (token, payload) => {
-  return new User({ id: token.id, email: token.email })
-    .save(payload)
+const putBot = (bot, payload) => {
+  return bot.save(payload)
+}
+
+const verifyOwnership = (token, botId) => {
+  return new Bot({ id: botId, user_id: token.id }).fetch({ required: true })
 }
 
 export const register = (server, options, next) => {
   server.route([
     {
-      method: 'POST',
-      path: '/api/authenticate',
-      config: {
-        validate: {
-          payload: authenticationPayload,
-        },
-        handler(req, reply) {
-          User.authenticate(req.payload.email, req.payload.password)
-            .then((token) => reply({
-              success: true,
-              payload: { token },
-              timestamp: Date.now(),
-            }))
-            .catch((err) => reply({
-              success: false,
-              error: err.name,
-              message: err.message,
-              stack: err.stack,
-              timestamp: Date.now(),
-            }))
-        },
-      },
-    },
-    {
       method: 'GET',
-      path: '/api/users/{id}',
+      path: '/api/users/{userId}/bots/{botId}',
       config: {
         validate: {
           headers: headers,
-          params: userParams,
+          params: botParams,
         },
         handler(req, reply) {
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.id, token))
-            .then((token) => User.profile(token.id, token.email))
-            .then((user) => reply({
+            .then((token) => verifyUser(req.params.userId, token))
+            .then((token) => verifyOwnership(token, req.params.botId))
+            .then((bot) => Bot.profile(bot.get('id')))
+            .then((bot) => reply({
               success: true,
-              payload: { user },
+              payload: { bot },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -80,18 +57,17 @@ export const register = (server, options, next) => {
     },
     {
       method: 'POST',
-      path: '/api/users',
+      path: '/api/users/{userId}/bots',
       config: {
         validate: {
-          payload: userPostPayload,
+          payload: botPostPayload,
         },
         handler(req, reply) {
-          User.forge(req.payload)
+          Bot.forge(req.payload)
             .save()
-            .then((user) => User.profile(user.get('id'), user.get('email')))
-            .then((user) => reply({
+            .then((bot) => reply({
               success: true,
-              payload: { user },
+              payload: { bot },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -106,20 +82,21 @@ export const register = (server, options, next) => {
     },
     {
       method: 'PATCH',
-      path: '/api/users/{id}',
+      path: '/api/users/{userId}/bots/{botId}',
       config: {
         validate: {
           headers: headers,
-          params: userParams,
+          params: botParams,
         },
         handler(req, reply) {
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.id, token))
-            .then((token) => patchUser(token, req.payload))
-            .then((user) => User.profile(user.get('id'), user.get('email')))
-            .then((user) => reply({
+            .then((token) => verifyUser(req.params.userId, token))
+            .then((token) => verifyOwnership(token, req.params.botId))
+            .then((bot) => patchBot(bot, req.payload))
+            .then((bot) => Bot.profile(bot.get('id')))
+            .then((bot) => reply({
               success: true,
-              payload: { user },
+              payload: { bot },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -134,20 +111,21 @@ export const register = (server, options, next) => {
     },
     {
       method: 'PUT',
-      path: '/api/users/{id}',
+      path: '/api/users/{userId}/bots/{botId}',
       config: {
         validate: {
           headers: headers,
-          params: userParams,
+          params: botParams,
         },
         handler(req, reply) {
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.id, token))
-            .then((token) => putUser(token, req.payload))
-            .then((user) => User.profile(user.get('id'), user.get('email')))
-            .then((user) => reply({
+            .then((token) => verifyUser(req.params.userId, token))
+            .then((token) => verifyOwnership(token, req.params.botId))
+            .then((bot) => putBot(bot, req.payload))
+            .then((bot) => Bot.profile(bot.get('id')))
+            .then((bot) => reply({
               success: true,
-              payload: { user },
+              payload: { bot },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -162,16 +140,17 @@ export const register = (server, options, next) => {
     },
     {
       method: 'DELETE',
-      path: '/api/users/{id}',
+      path: '/api/users/{userId}/bots/{botId}',
       config: {
         validate: {
           headers: headers,
-          params: userParams,
+          params: botParams,
         },
         handler(req, reply) {
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.id, token))
-            .then((token) => deleteUser(token))
+            .then((token) => verifyUser(req.params.userId, token))
+            .then((token) => verifyOwnership(token, req.params.botId))
+            .then((bot) => deleteBot(bot))
             .then(() => reply({
               success: true,
               timestamp: Date.now(),
@@ -192,6 +171,6 @@ export const register = (server, options, next) => {
 }
 
 register.attributes = {
-  name: 'api.users',
+  name: 'api.bots',
   version: '1.0.0',
 }

@@ -25,6 +25,11 @@ describe('Skynet', () => {
         },
       })
 
+    nock('http://api.wolframalpha.com')
+      .get('/v2/query')
+      .query(true)
+      .reply(200, wolframSuccessResponse)
+
     skynet('test').should.be.instanceOf(Promise)
   })
 

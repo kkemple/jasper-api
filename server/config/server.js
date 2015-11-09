@@ -13,4 +13,5 @@ export default [
   { register: require('../plugins/oauth') },
   { register: require('../plugins/logging') },
   { register: require('../plugins/api/users') },
+  { register: require('../plugins/api/bots') },
 ]

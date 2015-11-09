@@ -1,3 +1,5 @@
+import assign from 'lodash.assign'
+
 import orm from '../db'
 
 const config = {
@@ -25,7 +27,18 @@ const config = {
 }
 
 const virtuals = {
-
+  profile(id) {
+    return new this({ id: id })
+      .fetch({ required: true, withRelated: ['integrations', 'emails'] })
+      .then((bot) => assign(
+        {},
+        bot.toJSON(),
+        {
+          integrations: bot.related('integrations').pluck('type'),
+          emails: bot.related('emails').pluck('email'),
+        }
+      ))
+  },
 }
 
 const Bot = orm.Model.extend(config, virtuals)

@@ -51,3 +51,22 @@ export const oauthSuccessSchema = {
     updated_at: Joi.date().required(),
   }),
 }
+
+export const botGetSuccessSchema = {
+  success: Joi.boolean().invalid(false).required(),
+  timestamp: Joi.date().required(),
+  payload: Joi.object().keys({
+    bot: Joi.object().keys({
+      id: Joi.number().required(),
+      user_id: Joi.number().required(),
+      active: Joi.boolean().required(),
+      name: Joi.string().required(),
+      phone_number: Joi.string().required(),
+      extra_data: Joi.string().allow(null).allow(''),
+      created_at: Joi.date().required(),
+      updated_at: Joi.date().required(),
+      integrations: Joi.array(),
+      emails: Joi.array(),
+    }),
+  }),
+}
