@@ -3,7 +3,10 @@ import Hapi from 'hapi'
 import Joi from 'joi'
 import jwt from 'jsonwebtoken'
 
-import { botGetSuccessSchema } from '../../../validations'
+import {
+  botGetSuccessSchema,
+  botsGetSuccessSchema,
+} from '../../../validations'
 import config from '../../../../server/config/server'
 import models from '../../../../models'
 import { userConfig, botConfig } from '../../../helpers/config'
@@ -25,7 +28,74 @@ describe('Hapi Server', () => {
   })
 
   describe('Api Plugin', () => {
-    describe('Bot Endpoint', () => {
+    describe('Bots Endpoint', () => {
+      describe('GET /api/users/{userId}/bots', () => {
+        let userModel
+        let botModel
+        let botUrl
+
+        before((done) => {
+          User.forge(userConfig({ password: 'test' }))
+            .save()
+            .then((user) => {
+              userModel = user
+
+              Bot.forge(botConfig({ user_id: userModel.get('id') }))
+                .save()
+                .then((bot) => {
+                  botModel = bot
+
+                  botUrl = `/api/users/${userModel.get('id')}/bots`
+                  done()
+                })
+            })
+            .catch(done)
+        })
+
+        after((done) => {
+          botModel.destroy()
+            .then(() => userModel.destroy())
+            .then(() => done())
+            .catch(done)
+        })
+
+        describe('with a valid token', () => {
+          it('should return bots belonging to user', (done) => {
+            server.inject({
+              method: 'GET',
+              url: botUrl,
+              headers: {
+                'x-access-token': jwt.sign({
+                  id: userModel.get('id'),
+                  email: userModel.get('email'),
+                }, process.env.ENCRYPTION_KEY),
+              },
+            }, (res) => {
+              const payload = JSON.parse(res.payload)
+
+              Joi.validate(payload, botsGetSuccessSchema, (err) => {
+                if (err) return done(err)
+                done()
+              })
+            })
+          })
+        })
+
+        describe('with an invalid token', () => {
+          it('should return with an Bad Request', (done) => {
+            server.inject({
+              method: 'GET',
+              url: botUrl,
+            }, (res) => {
+              const payload = JSON.parse(res.payload)
+
+              payload.error.should.eq('Bad Request')
+              done()
+            })
+          })
+        })
+      })
+
       describe('GET /api/users/{userId}/bots/{botId}', () => {
         let userModel
         let botModel
@@ -57,7 +127,7 @@ describe('Hapi Server', () => {
         })
 
         describe('with a valid token', () => {
-          it('should return a valid response', (done) => {
+          it('should return bot data', (done) => {
             server.inject({
               method: 'GET',
               url: botUrl,
@@ -83,6 +153,71 @@ describe('Hapi Server', () => {
             server.inject({
               method: 'GET',
               url: botUrl,
+            }, (res) => {
+              const payload = JSON.parse(res.payload)
+
+              payload.error.should.eq('Bad Request')
+              done()
+            })
+          })
+        })
+      })
+
+      describe('POST /api/users/{userId}/bots', () => {
+        let userModel
+
+        before((done) => {
+          User.forge(userConfig({ password: 'test' }))
+            .save()
+            .then((user) => {
+              userModel = user
+
+              done()
+            })
+            .catch(done)
+        })
+
+        after((done) => {
+          Bot.collection()
+            .fetch()
+            .then((bots) => bots.invokeThen('destroy'))
+            .then(() => userModel.destroy())
+            .then(() => done())
+            .catch(done)
+        })
+
+        describe('with a valid token', () => {
+          it('should return bots belonging to user', (done) => {
+            server.inject({
+              method: 'POST',
+              url: `/api/users/${userModel.get('id')}/bots`,
+              payload: {
+                name: 'test-bot',
+                phone_number: '+15555555555',
+                user_id: userModel.get('id'),
+              },
+              headers: {
+                'x-access-token': jwt.sign({
+                  id: userModel.get('id'),
+                  email: userModel.get('email'),
+                }, process.env.ENCRYPTION_KEY),
+              },
+            }, (res) => {
+              const payload = JSON.parse(res.payload)
+
+              Joi.validate(payload, botGetSuccessSchema, (err) => {
+                if (err) return done(err)
+                done()
+              })
+            })
+          })
+        })
+
+        describe('with an invalid token', () => {
+          it('should return with an Bad Request', (done) => {
+            server.inject({
+              method: 'GET',
+              url: `/api/users/${userModel.get('id')}/bots`,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -124,7 +259,7 @@ describe('Hapi Server', () => {
         })
 
         describe('with a valid token', () => {
-          it('should return an updated user', (done) => {
+          it('should return an updated bot', (done) => {
             server.inject({
               method: 'PATCH',
               url: botUrl,
@@ -195,7 +330,7 @@ describe('Hapi Server', () => {
         })
 
         describe('with a valid token', () => {
-          it('should return an updated user', (done) => {
+          it('should return an updated bot', (done) => {
             server.inject({
               method: 'PUT',
               url: botUrl,
@@ -268,7 +403,7 @@ describe('Hapi Server', () => {
         })
 
         describe('with a valid token', () => {
-          it('should delete the user', (done) => {
+          it('should delete the bot', (done) => {
             server.inject({
               method: 'DELETE',
               url: botUrl,

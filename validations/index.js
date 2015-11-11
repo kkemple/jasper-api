@@ -25,3 +25,14 @@ export const userPostPayload = {
 export const userParams = {
   id: Joi.number().required(),
 }
+
+export const botPostPayload = {
+  name: Joi.string().required(),
+  phone_number: Joi.string().required(),
+  user_id: Joi.number().required(),
+}
+
+export const botParams = {
+  userId: Joi.number().required(),
+  botId: Joi.number().required(),
+}

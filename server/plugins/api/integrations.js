@@ -1,36 +1,34 @@
-import Joi from 'joi'
-
 import models from '../../../models'
 import verifyUser from '../../verify-user'
 import verifyToken from '../../verify-token'
 import {
   headers,
-  botPostPayload,
-  botParams,
+  integrationPostPayload,
+  integrationParams,
 } from '../../../validations'
 
-const { Bot } = models
+const { Integration, Bot } = models
 
-const getBots = (token) => {
-  return Bot.collection()
-    .query({ where: { user_id: token.id }})
-    .fetch()
+const getIntegrations = (bot) => {
+  return bot.integrations().fetch()
 }
 
-const getBotProfiles = (bots) => {
-  return Promise.all(bots.map((bot) => Bot.profile(bot.get('id'))))
+const getIntegrationProfiles = (integrations) => {
+  return Promise.all(
+    integrations.map((integration) => Integration.profile(integration.get('id')))
+  )
 }
 
-const deleteBot = (bot) => {
-  return bot.destroy()
+const deleteIntegration = (integration) => {
+  return integration.destroy()
 }
 
-const patchBot = (bot, payload) => {
-  return bot.save(payload, { patch: true })
+const patchIntegration = (integration, payload) => {
+  return integration.save(payload, { patch: true })
 }
 
-const putBot = (bot, payload) => {
-  return bot.save(payload)
+const putIntegration = (integration, payload) => {
+  return integration.save(payload)
 }
 
 const verifyOwnership = (token, botId) => {
@@ -45,15 +43,13 @@ export const register = (server, options, next) => {
       config: {
         validate: {
           headers: headers,
-          params: {
-            userId: Joi.number(),
-          },
+          params: integrationParams,
         },
         handler(req, reply) {
           verifyToken(req.headers['x-access-token'])
             .then((token) => verifyUser(req.params.userId, token))
-            .then((token) => getBots(token))
-            .then((bots) => getBotProfiles(bots))
+            .then((token) => getIntegrations(token))
+            .then((bots) => getIntegrationProfiles(bots))
             .then((bots) => reply({
               success: true,
               payload: { bots },
@@ -75,7 +71,7 @@ export const register = (server, options, next) => {
       config: {
         validate: {
           headers: headers,
-          params: botParams,
+          params: integrationParams,
         },
         handler(req, reply) {
           verifyToken(req.headers['x-access-token'])
@@ -102,12 +98,11 @@ export const register = (server, options, next) => {
       path: '/api/users/{userId}/bots',
       config: {
         validate: {
-          payload: botPostPayload,
+          payload: integrationPostPayload,
         },
         handler(req, reply) {
           Bot.forge(req.payload)
             .save()
-            .then((bot) => bot.fetch())
             .then((bot) => reply({
               success: true,
               payload: { bot },
@@ -129,13 +124,13 @@ export const register = (server, options, next) => {
       config: {
         validate: {
           headers: headers,
-          params: botParams,
+          params: integrationParams,
         },
         handler(req, reply) {
           verifyToken(req.headers['x-access-token'])
             .then((token) => verifyUser(req.params.userId, token))
             .then((token) => verifyOwnership(token, req.params.botId))
-            .then((bot) => patchBot(bot, req.payload))
+            .then((bot) => patchIntegration(bot, req.payload))
             .then((bot) => Bot.profile(bot.get('id')))
             .then((bot) => reply({
               success: true,
@@ -158,7 +153,7 @@ export const register = (server, options, next) => {
       config: {
         validate: {
           headers: headers,
-          params: botParams,
+          params: integrationParams,
         },
         handler(req, reply) {
           verifyToken(req.headers['x-access-token'])
@@ -187,7 +182,7 @@ export const register = (server, options, next) => {
       config: {
         validate: {
           headers: headers,
-          params: botParams,
+          params: integrationParams,
         },
         handler(req, reply) {
           verifyToken(req.headers['x-access-token'])
@@ -214,6 +209,6 @@ export const register = (server, options, next) => {
 }
 
 register.attributes = {
-  name: 'api.bots',
+  name: 'api.integrations',
   version: '1.0.0',
 }
