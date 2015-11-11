@@ -13,6 +13,19 @@ const parseEmpty = (str) => {
   return str
 }
 
+export const find = (artifact, source) => {
+  const scrubbedArtifact = artifact
+    .replace(/\[(\w+)\]/g, '.$1')
+    .replace(/^\./, '')
+    .replace(/\.$/, '')
+
+  return reduce(
+    scrubbedArtifact.split('.'),
+    artifactReducer,
+    source
+  )
+}
+
 export default class Archaeologist {
   constructor(xml) {
     this.xml = xml
@@ -38,15 +51,6 @@ export default class Archaeologist {
   }
 
   find(artifact, source) {
-    const scrubbedArtifact = artifact
-      .replace(/\[(\w+)\]/g, '.$1')
-      .replace(/^\./, '')
-      .replace(/\.$/, '')
-
-    return reduce(
-      scrubbedArtifact.split('.'),
-      artifactReducer,
-      source || this.json
-    )
+    return find(artifact, source || this.json)
   }
 }

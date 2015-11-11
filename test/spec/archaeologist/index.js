@@ -1,7 +1,7 @@
 import chai from 'chai'
 import Promise from 'bluebird'
 
-import Archaeologist from '../../../archaeologist'
+import Archaeologist, { find } from '../../../archaeologist'
 import { wolframAlphaData } from '../../fixtures'
 
 chai.should()
@@ -11,6 +11,13 @@ describe('Archaeologist', () => {
 
   beforeEach(() => {
     archaeologist = new Archaeologist(wolframAlphaData)
+  })
+
+  describe('Archaeologist#find (static)', () => {
+    it('should be usable as a static method (with different source)', () => {
+      const found = find('test', { test: 'test' })
+      found.should.eq('test')
+    })
   })
 
   describe('#constructor', () => {
