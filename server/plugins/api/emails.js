@@ -1,65 +1,66 @@
-import Joi from 'joi'
+import assign from 'lodash.assign'
 
 import models from '../../../models'
 import verifyUser from '../../verify-user'
 import verifyToken from '../../verify-token'
 import {
   headers,
-  botPostPayload,
   botParams,
+  emailPostPayload,
+  emailParams,
 } from '../../../validations'
 
-const { Bot } = models
+const { Email, Bot } = models
 
-const getBots = (token) => {
-  return Bot.collection()
-    .query({ where: { user_id: token.id }})
-    .fetch()
+const getBot = (userId, botId) => {
+  return new Bot({ user_id: userId, id: botId }).fetch()
 }
 
-const getBotProfiles = (bots) => {
-  return Promise.all(bots.map((bot) => Bot.profile(bot.get('id'))))
+const getEmail = (bot, emailId) => {
+  return bot.emails().fetchOne({ id: emailId })
 }
 
-const deleteBot = (bot) => {
-  return bot.integrations()
-    .fetch()
-    .then((integrations) => integrations.invokeThen('destroy'))
-    .then(() => bot.destroy())
+const getEmails = (bot) => {
+  return bot.emails().fetch()
 }
 
-const patchBot = (bot, payload) => {
-  return bot.save(payload, { patch: true })
+const getEmailProfiles = (emails) => {
+  return emails.toJSON()
 }
 
-const putBot = (bot, payload) => {
-  return bot.save(payload)
+const createEmail = (botId, payload) => {
+  return Email.forge(assign({}, { bot_id: botId }, payload)).save()
 }
 
-const getBot = (token, botId) => {
-  return new Bot({ id: botId, user_id: token.id }).fetch({ required: true })
+const patchEmail = (email, payload) => {
+  return email.save(payload, { patch: true })
+}
+
+const putEmail = (email, payload) => {
+  return email.save(payload)
 }
 
 export const register = (server, options, next) => {
   server.route([
     {
       method: 'GET',
-      path: '/api/users/{userId}/bots',
+      path: '/api/users/{userId}/bots/{botId}/emails',
       config: {
         validate: {
           headers: headers,
-          params: {
-            userId: Joi.number(),
-          },
+          params: botParams,
         },
         handler(req, reply) {
+          const { userId, botId } = req.params
+
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.userId, token))
-            .then((token) => getBots(token))
-            .then((bots) => getBotProfiles(bots))
-            .then((bots) => reply({
+            .then((token) => verifyUser(userId, token))
+            .then(() => getBot(userId, botId))
+            .then((bot) => getEmails(bot))
+            .then((emails) => getEmailProfiles(emails))
+            .then((emails) => reply({
               success: true,
-              payload: { bots },
+              payload: { emails },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -74,20 +75,23 @@ export const register = (server, options, next) => {
     },
     {
       method: 'GET',
-      path: '/api/users/{userId}/bots/{botId}',
+      path: '/api/users/{userId}/bots/{botId}/emails/{emailId}',
       config: {
         validate: {
           headers: headers,
-          params: botParams,
+          params: emailParams,
         },
         handler(req, reply) {
+          const { userId, botId, emailId } = req.params
+
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.userId, token))
-            .then((token) => getBot(token, req.params.botId))
-            .then((bot) => Bot.profile(bot.get('id')))
-            .then((bot) => reply({
+            .then((token) => verifyUser(userId, token))
+            .then(() => getBot(userId, botId))
+            .then((bot) => getEmail(bot, emailId))
+            .then((email) => email.toJSON())
+            .then((email) => reply({
               success: true,
-              payload: { bot },
+              payload: { email },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -102,18 +106,18 @@ export const register = (server, options, next) => {
     },
     {
       method: 'POST',
-      path: '/api/users/{userId}/bots',
+      path: '/api/users/{userId}/bots/{botId}/emails',
       config: {
         validate: {
-          payload: botPostPayload,
+          params: botParams,
+          payload: emailPostPayload,
         },
         handler(req, reply) {
-          Bot.forge(req.payload)
-            .save()
-            .then((bot) => bot.fetch())
-            .then((bot) => reply({
+          createEmail(req.params.botId, req.payload)
+            .then((email) => email.fetch())
+            .then((email) => reply({
               success: true,
-              payload: { bot },
+              payload: { email },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -128,21 +132,25 @@ export const register = (server, options, next) => {
     },
     {
       method: 'PATCH',
-      path: '/api/users/{userId}/bots/{botId}',
+      path: '/api/users/{userId}/bots/{botId}/emails/{emailId}',
       config: {
         validate: {
           headers: headers,
-          params: botParams,
+          params: emailParams,
         },
         handler(req, reply) {
+          const { userId, botId, emailId } = req.params
+          const { payload } = req
+
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.userId, token))
-            .then((token) => getBot(token, req.params.botId))
-            .then((bot) => patchBot(bot, req.payload))
-            .then((bot) => Bot.profile(bot.get('id')))
-            .then((bot) => reply({
+            .then((token) => verifyUser(userId, token))
+            .then(() => getBot(userId, botId))
+            .then((bot) => getEmail(bot, emailId))
+            .then((email) => patchEmail(email, payload))
+            .then((email) => email.toJSON())
+            .then((email) => reply({
               success: true,
-              payload: { bot },
+              payload: { email },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -157,21 +165,25 @@ export const register = (server, options, next) => {
     },
     {
       method: 'PUT',
-      path: '/api/users/{userId}/bots/{botId}',
+      path: '/api/users/{userId}/bots/{botId}/emails/{emailId}',
       config: {
         validate: {
           headers: headers,
-          params: botParams,
+          params: emailParams,
         },
         handler(req, reply) {
+          const { userId, botId, emailId } = req.params
+          const { payload } = req
+
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.userId, token))
-            .then((token) => getBot(token, req.params.botId))
-            .then((bot) => putBot(bot, req.payload))
-            .then((bot) => Bot.profile(bot.get('id')))
-            .then((bot) => reply({
+            .then((token) => verifyUser(userId, token))
+            .then(() => getBot(userId, botId))
+            .then((bot) => getEmail(bot, emailId))
+            .then((email) => putEmail(email, payload))
+            .then((email) => email.toJSON())
+            .then((email) => reply({
               success: true,
-              payload: { bot },
+              payload: { email },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -186,17 +198,20 @@ export const register = (server, options, next) => {
     },
     {
       method: 'DELETE',
-      path: '/api/users/{userId}/bots/{botId}',
+      path: '/api/users/{userId}/bots/{botId}/emails/{emailId}',
       config: {
         validate: {
           headers: headers,
-          params: botParams,
+          params: emailParams,
         },
         handler(req, reply) {
+          const { userId, botId, emailId } = req.params
+
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.userId, token))
-            .then((token) => getBot(token, req.params.botId))
-            .then((bot) => deleteBot(bot))
+            .then((token) => verifyUser(userId, token))
+            .then(() => getBot(userId, botId))
+            .then((bot) => getEmail(bot, emailId))
+            .then((email) => email.destroy())
             .then(() => reply({
               success: true,
               timestamp: Date.now(),
@@ -217,6 +232,6 @@ export const register = (server, options, next) => {
 }
 
 register.attributes = {
-  name: 'api.bots',
+  name: 'api.emails',
   version: '1.0.0',
 }

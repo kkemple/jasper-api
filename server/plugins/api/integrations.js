@@ -1,26 +1,35 @@
+import assign from 'lodash.assign'
+
 import models from '../../../models'
 import verifyUser from '../../verify-user'
 import verifyToken from '../../verify-token'
 import {
   headers,
+  botParams,
   integrationPostPayload,
   integrationParams,
 } from '../../../validations'
 
 const { Integration, Bot } = models
 
+const getBot = (userId, botId) => {
+  return new Bot({ user_id: userId, id: botId }).fetch()
+}
+
+const getIntegration = (bot, integrationId) => {
+  return bot.integrations().fetchOne({ id: integrationId })
+}
+
 const getIntegrations = (bot) => {
   return bot.integrations().fetch()
 }
 
 const getIntegrationProfiles = (integrations) => {
-  return Promise.all(
-    integrations.map((integration) => Integration.profile(integration.get('id')))
-  )
+  return integrations.toJSON()
 }
 
-const deleteIntegration = (integration) => {
-  return integration.destroy()
+const createIntegration = (botId, payload) => {
+  return Integration.forge(assign({}, { bot_id: botId }, payload)).save()
 }
 
 const patchIntegration = (integration, payload) => {
@@ -31,28 +40,27 @@ const putIntegration = (integration, payload) => {
   return integration.save(payload)
 }
 
-const verifyOwnership = (token, botId) => {
-  return new Bot({ id: botId, user_id: token.id }).fetch({ required: true })
-}
-
 export const register = (server, options, next) => {
   server.route([
     {
       method: 'GET',
-      path: '/api/users/{userId}/bots',
+      path: '/api/users/{userId}/bots/{botId}/integrations',
       config: {
         validate: {
           headers: headers,
-          params: integrationParams,
+          params: botParams,
         },
         handler(req, reply) {
+          const { userId, botId } = req.params
+
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.userId, token))
-            .then((token) => getIntegrations(token))
-            .then((bots) => getIntegrationProfiles(bots))
-            .then((bots) => reply({
+            .then((token) => verifyUser(userId, token))
+            .then(() => getBot(userId, botId))
+            .then((bot) => getIntegrations(bot))
+            .then((integrations) => getIntegrationProfiles(integrations))
+            .then((integrations) => reply({
               success: true,
-              payload: { bots },
+              payload: { integrations },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -67,20 +75,23 @@ export const register = (server, options, next) => {
     },
     {
       method: 'GET',
-      path: '/api/users/{userId}/bots/{botId}',
+      path: '/api/users/{userId}/bots/{botId}/integrations/{integrationId}',
       config: {
         validate: {
           headers: headers,
           params: integrationParams,
         },
         handler(req, reply) {
+          const { userId, botId, integrationId } = req.params
+
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.userId, token))
-            .then((token) => verifyOwnership(token, req.params.botId))
-            .then((bot) => Bot.profile(bot.get('id')))
-            .then((bot) => reply({
+            .then((token) => verifyUser(userId, token))
+            .then(() => getBot(userId, botId))
+            .then((bot) => getIntegration(bot, integrationId))
+            .then((integration) => integration.toJSON())
+            .then((integration) => reply({
               success: true,
-              payload: { bot },
+              payload: { integration },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -95,17 +106,18 @@ export const register = (server, options, next) => {
     },
     {
       method: 'POST',
-      path: '/api/users/{userId}/bots',
+      path: '/api/users/{userId}/bots/{botId}/integrations',
       config: {
         validate: {
+          params: botParams,
           payload: integrationPostPayload,
         },
         handler(req, reply) {
-          Bot.forge(req.payload)
-            .save()
-            .then((bot) => reply({
+          createIntegration(req.params.botId, req.payload)
+            .then((integration) => integration.fetch())
+            .then((integration) => reply({
               success: true,
-              payload: { bot },
+              payload: { integration },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -120,21 +132,25 @@ export const register = (server, options, next) => {
     },
     {
       method: 'PATCH',
-      path: '/api/users/{userId}/bots/{botId}',
+      path: '/api/users/{userId}/bots/{botId}/integrations/{integrationId}',
       config: {
         validate: {
           headers: headers,
           params: integrationParams,
         },
         handler(req, reply) {
+          const { userId, botId, integrationId } = req.params
+          const { payload } = req
+
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.userId, token))
-            .then((token) => verifyOwnership(token, req.params.botId))
-            .then((bot) => patchIntegration(bot, req.payload))
-            .then((bot) => Bot.profile(bot.get('id')))
-            .then((bot) => reply({
+            .then((token) => verifyUser(userId, token))
+            .then(() => getBot(userId, botId))
+            .then((bot) => getIntegration(bot, integrationId))
+            .then((integration) => patchIntegration(integration, payload))
+            .then((integration) => integration.toJSON())
+            .then((integration) => reply({
               success: true,
-              payload: { bot },
+              payload: { integration },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -149,21 +165,25 @@ export const register = (server, options, next) => {
     },
     {
       method: 'PUT',
-      path: '/api/users/{userId}/bots/{botId}',
+      path: '/api/users/{userId}/bots/{botId}/integrations/{integrationId}',
       config: {
         validate: {
           headers: headers,
           params: integrationParams,
         },
         handler(req, reply) {
+          const { userId, botId, integrationId } = req.params
+          const { payload } = req
+
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.userId, token))
-            .then((token) => verifyOwnership(token, req.params.botId))
-            .then((bot) => putBot(bot, req.payload))
-            .then((bot) => Bot.profile(bot.get('id')))
-            .then((bot) => reply({
+            .then((token) => verifyUser(userId, token))
+            .then(() => getBot(userId, botId))
+            .then((bot) => getIntegration(bot, integrationId))
+            .then((integration) => putIntegration(integration, payload))
+            .then((integration) => integration.toJSON())
+            .then((integration) => reply({
               success: true,
-              payload: { bot },
+              payload: { integration },
               timestamp: Date.now(),
             }))
             .catch((err) => reply({
@@ -178,17 +198,20 @@ export const register = (server, options, next) => {
     },
     {
       method: 'DELETE',
-      path: '/api/users/{userId}/bots/{botId}',
+      path: '/api/users/{userId}/bots/{botId}/integrations/{integrationId}',
       config: {
         validate: {
           headers: headers,
           params: integrationParams,
         },
         handler(req, reply) {
+          const { userId, botId, integrationId } = req.params
+
           verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.userId, token))
-            .then((token) => verifyOwnership(token, req.params.botId))
-            .then((bot) => deleteBot(bot))
+            .then((token) => verifyUser(userId, token))
+            .then(() => getBot(userId, botId))
+            .then((bot) => getIntegration(bot, integrationId))
+            .then((integration) => integration.destroy())
             .then(() => reply({
               success: true,
               timestamp: Date.now(),

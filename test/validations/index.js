@@ -99,9 +99,10 @@ export const integrationGetSuccessSchema = {
     integration: Joi.object().keys({
       id: Joi.number().required(),
       bot_id: Joi.number().required(),
+      type: Joi.string().required(),
       active: Joi.boolean().required(),
       access_token: Joi.string().required(),
-      expires_in: Joi.string(),
+      expires_in: Joi.number(),
       refresh_token: Joi.string(),
       extra_data: Joi.string().allow(null).allow(''),
       created_at: Joi.date().required(),
@@ -119,9 +120,44 @@ export const integrationsGetSuccessSchema = {
         id: Joi.number().required(),
         bot_id: Joi.number().required(),
         active: Joi.boolean().required(),
+        type: Joi.string().required(),
         access_token: Joi.string().required(),
-        expires_in: Joi.string(),
+        expires_in: Joi.number(),
         refresh_token: Joi.string(),
+        extra_data: Joi.string().allow(null).allow(''),
+        created_at: Joi.date().required(),
+        updated_at: Joi.date().required(),
+      })
+    ),
+  }),
+}
+
+export const emailGetSuccessSchema = {
+  success: Joi.boolean().invalid(false).required(),
+  timestamp: Joi.date().required(),
+  payload: Joi.object().keys({
+    email: Joi.object().keys({
+      id: Joi.number().required(),
+      bot_id: Joi.number().required(),
+      email: Joi.string().email().required(),
+      active: Joi.boolean().required(),
+      extra_data: Joi.string().allow(null).allow(''),
+      created_at: Joi.date().required(),
+      updated_at: Joi.date().required(),
+    }),
+  }),
+}
+
+export const emailsGetSuccessSchema = {
+  success: Joi.boolean().invalid(false).required(),
+  timestamp: Joi.date().required(),
+  payload: Joi.object().keys({
+    emails: Joi.array().items(
+      Joi.object().keys({
+        id: Joi.number().required(),
+        bot_id: Joi.number().required(),
+        email: Joi.string().email().required(),
+        active: Joi.boolean().required(),
         extra_data: Joi.string().allow(null).allow(''),
         created_at: Joi.date().required(),
         updated_at: Joi.date().required(),

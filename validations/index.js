@@ -36,3 +36,26 @@ export const botParams = {
   userId: Joi.number().required(),
   botId: Joi.number().required(),
 }
+
+export const integrationPostPayload = {
+  type: Joi.string().required(),
+  access_token: Joi.string().required(),
+  refresh_token: Joi.string(),
+  expires_in: Joi.number(),
+}
+
+export const integrationParams = {
+  userId: Joi.number().required(),
+  botId: Joi.number().required(),
+  integrationId: Joi.number().required(),
+}
+
+export const emailPostPayload = {
+  email: Joi.string().email().required(),
+}
+
+export const emailParams = {
+  userId: Joi.number().required(),
+  botId: Joi.number().required(),
+  emailId: Joi.number().required(),
+}

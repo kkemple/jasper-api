@@ -1,3 +1,4 @@
 #! /bin/bash
 
-node_modules/.bin/mocha ./test/spec --recursive --compilers js:babel-core/register
+node_modules/.bin/mocha ./test/spec --recursive --compilers \
+  js:babel-core/register -- --sourceMaps=inline

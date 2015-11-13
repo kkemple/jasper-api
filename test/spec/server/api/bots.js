@@ -187,7 +187,7 @@ describe('Hapi Server', () => {
         })
 
         describe('with a valid token', () => {
-          it('should return bots belonging to user', (done) => {
+          it('should return newly created bot', (done) => {
             server.inject({
               method: 'POST',
               url: `/api/users/${userModel.get('id')}/bots`,
@@ -216,7 +216,7 @@ describe('Hapi Server', () => {
         describe('with an invalid token', () => {
           it('should return with an Bad Request', (done) => {
             server.inject({
-              method: 'GET',
+              method: 'POST',
               url: `/api/users/${userModel.get('id')}/bots`,
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -360,7 +360,7 @@ describe('Hapi Server', () => {
         describe('with an invalid token', () => {
           it('should return with an Bad Request', (done) => {
             server.inject({
-              method: 'GET',
+              method: 'PUT',
               url: botUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)

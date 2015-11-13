@@ -14,4 +14,6 @@ export default [
   { register: require('../plugins/logging') },
   { register: require('../plugins/api/users') },
   { register: require('../plugins/api/bots') },
+  { register: require('../plugins/api/integrations') },
+  { register: require('../plugins/api/emails') },
 ]
