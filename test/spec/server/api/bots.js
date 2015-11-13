@@ -28,42 +28,45 @@ describe('Hapi Server', () => {
   })
 
   describe('Api Plugin', () => {
+    let userModel
+    let botModel
+    let botUrl
+    let botsUrl
+
+    before((done) => {
+      User.forge(userConfig({ password: 'test' }))
+        .save()
+        .then((user) => {
+          userModel = user
+
+          Bot.forge(botConfig({ user_id: userModel.get('id') }))
+            .save()
+            .then((bot) => {
+              botModel = bot
+              botUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}`
+              botsUrl = `/api/users/${userModel.get('id')}/bots`
+              done()
+            })
+        })
+        .catch(done)
+    })
+
+    after((done) => {
+      Bot.collection()
+        .fetch()
+        .then((bots) => bots.invokeThen('destroy'))
+        .then(() => userModel.destroy())
+        .then(() => done())
+        .catch(done)
+    })
+
     describe('Bots Endpoint', () => {
       describe('GET /api/users/{userId}/bots', () => {
-        let userModel
-        let botModel
-        let botUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  botUrl = `/api/users/${userModel.get('id')}/bots`
-                  done()
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          botModel.destroy()
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return bots belonging to user', (done) => {
             server.inject({
               method: 'GET',
-              url: botUrl,
+              url: botsUrl,
               headers: {
                 'x-access-token': jwt.sign({
                   id: userModel.get('id'),
@@ -97,35 +100,6 @@ describe('Hapi Server', () => {
       })
 
       describe('GET /api/users/{userId}/bots/{botId}', () => {
-        let userModel
-        let botModel
-        let botUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  botUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}`
-                  done()
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          botModel.destroy()
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return bot data', (done) => {
             server.inject({
@@ -164,33 +138,11 @@ describe('Hapi Server', () => {
       })
 
       describe('POST /api/users/{userId}/bots', () => {
-        let userModel
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              done()
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          Bot.collection()
-            .fetch()
-            .then((bots) => bots.invokeThen('destroy'))
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return newly created bot', (done) => {
             server.inject({
               method: 'POST',
-              url: `/api/users/${userModel.get('id')}/bots`,
+              url: botsUrl,
               payload: {
                 name: 'test-bot',
                 phone_number: '+15555555555',
@@ -229,35 +181,6 @@ describe('Hapi Server', () => {
       })
 
       describe('PATCH /api/users/{userId}/bots/{botId}', () => {
-        let userModel
-        let botModel
-        let botUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  botUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}`
-                  done()
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          botModel.destroy()
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return an updated bot', (done) => {
             server.inject({
@@ -300,35 +223,6 @@ describe('Hapi Server', () => {
       })
 
       describe('PUT /api/users/{userId}/bots/{botId}', () => {
-        let userModel
-        let botModel
-        let botUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  botUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}`
-                  done()
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          botModel.destroy()
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return an updated bot', (done) => {
             server.inject({
@@ -373,35 +267,6 @@ describe('Hapi Server', () => {
       })
 
       describe('DELETE /api/users/{userId}/bots/{botId}', () => {
-        let userModel
-        let botModel
-        let botUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  botUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}`
-                  done()
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          botModel.destroy()
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should delete the bot', (done) => {
             server.inject({

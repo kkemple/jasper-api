@@ -28,53 +28,55 @@ describe('Hapi Server', () => {
   })
 
   describe('Api Plugin', () => {
-    describe('Integrations Endpoint', () => {
-      describe('GET /api/users/{userId}/bots/{botId}/integrations', () => {
-        let userModel
-        let botModel
-        let integrationModel
-        let integrationUrl
+    let userModel
+    let botModel
+    let integrationUrl
+    let integrationsUrl
 
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
+    beforeEach((done) => {
+      User.forge(userConfig({ password: 'test' }))
+        .save()
+        .then((user) => {
+          userModel = user
+
+          Bot.forge(botConfig({ user_id: userModel.get('id') }))
             .save()
-            .then((user) => {
-              userModel = user
+            .then((bot) => {
+              botModel = bot
 
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
+              Integration.forge(integrationConfig({ bot_id: botModel.get('id') }))
                 .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  Integration.forge(integrationConfig({ bot_id: botModel.get('id') }))
-                    .save()
-                    .then((integration) => {
-                      integrationModel = integration
-                      integrationUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/integrations`
-                      done()
-                    })
+                .then((integration) => {
+                  integrationUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/integrations/${integration.get('id')}`
+                  integrationsUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/integrations`
+                  done()
                 })
             })
-            .catch(done)
         })
+        .catch(done)
+    })
 
-        after((done) => {
-          integrationModel.destroy()
-            .then(() => botModel.destroy())
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
+    afterEach((done) => {
+      Integration.collection()
+        .fetch()
+        .then((integrations) => integrations.invokeThen('destroy'))
+        .then(() => botModel.destroy())
+        .then(() => userModel.destroy())
+        .then(() => done())
+        .catch(done)
+    })
 
+    describe('Integrations Endpoint', () => {
+      describe('GET /api/users/{userId}/bots/{botId}/integrations', () => {
         describe('with a valid token', () => {
           it('should return integrations belonging to bot', (done) => {
             server.inject({
               method: 'GET',
-              url: integrationUrl,
+              url: integrationsUrl,
               headers: {
                 'x-access-token': jwt.sign({
                   id: userModel.get('id'),
-                  email: userModel.get('email'),
+                  integration: userModel.get('integration'),
                 }, process.env.ENCRYPTION_KEY),
               },
             }, (res) => {
@@ -104,42 +106,6 @@ describe('Hapi Server', () => {
       })
 
       describe('GET /api/users/{userId}/bots/{botId}/integrations/{integrationId}', () => {
-        let userModel
-        let botModel
-        let integrationModel
-        let integrationUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  Integration.forge(integrationConfig({ bot_id: botModel.get('id') }))
-                    .save()
-                    .then((integration) => {
-                      integrationModel = integration
-                      integrationUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/integrations/${integration.get('id')}`
-                      done()
-                    })
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          integrationModel.destroy()
-            .then(() => botModel.destroy())
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return integration data', (done) => {
             server.inject({
@@ -148,7 +114,7 @@ describe('Hapi Server', () => {
               headers: {
                 'x-access-token': jwt.sign({
                   id: userModel.get('id'),
-                  email: userModel.get('email'),
+                  integration: userModel.get('integration'),
                 }, process.env.ENCRYPTION_KEY),
               },
             }, (res) => {
@@ -178,37 +144,6 @@ describe('Hapi Server', () => {
       })
 
       describe('POST /api/users/{userId}/bots/{botId}/integrations', () => {
-        let userModel
-        let botModel
-        let integrationsUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-                  integrationsUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/integrations`
-                  done()
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          Integration.collection()
-            .fetch()
-            .then((integrations) => integrations.invokeThen('destroy'))
-            .then(() => botModel.destroy())
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return newly created integration', (done) => {
             server.inject({
@@ -223,7 +158,7 @@ describe('Hapi Server', () => {
               headers: {
                 'x-access-token': jwt.sign({
                   id: userModel.get('id'),
-                  email: userModel.get('email'),
+                  integration: userModel.get('integration'),
                 }, process.env.ENCRYPTION_KEY),
               },
             }, (res) => {
@@ -253,42 +188,6 @@ describe('Hapi Server', () => {
       })
 
       describe('PATCH /api/users/{userId}/bots/{botId}/integrations/{integrationId}', () => {
-        let userModel
-        let botModel
-        let integrationModel
-        let integrationUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  Integration.forge(integrationConfig({ bot_id: botModel.get('id') }))
-                    .save()
-                    .then((integration) => {
-                      integrationModel = integration
-                      integrationUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/integrations/${integration.get('id')}`
-                      done()
-                    })
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          integrationModel.destroy()
-            .then(() => botModel.destroy())
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return an updated integration', (done) => {
             server.inject({
@@ -297,7 +196,7 @@ describe('Hapi Server', () => {
               headers: {
                 'x-access-token': jwt.sign({
                   id: userModel.get('id'),
-                  email: userModel.get('email'),
+                  integration: userModel.get('integration'),
                 }, process.env.ENCRYPTION_KEY),
               },
               payload: {
@@ -332,42 +231,6 @@ describe('Hapi Server', () => {
       })
 
       describe('PUT /api/users/{userId}/bots/{botId}/integrations/{integrationId}', () => {
-        let userModel
-        let botModel
-        let integrationModel
-        let integrationUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  Integration.forge(integrationConfig({ bot_id: botModel.get('id') }))
-                    .save()
-                    .then((integration) => {
-                      integrationModel = integration
-                      integrationUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/integrations/${integration.get('id')}`
-                      done()
-                    })
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          integrationModel.destroy()
-            .then(() => botModel.destroy())
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return an updated integration', (done) => {
             server.inject({
@@ -376,7 +239,7 @@ describe('Hapi Server', () => {
               headers: {
                 'x-access-token': jwt.sign({
                   id: userModel.get('id'),
-                  email: userModel.get('email'),
+                  integration: userModel.get('integration'),
                 }, process.env.ENCRYPTION_KEY),
               },
               payload: {
@@ -412,42 +275,6 @@ describe('Hapi Server', () => {
       })
 
       describe('DELETE /api/users/{userId}/bots/{botId}/integrations/{integrationId}', () => {
-        let userModel
-        let botModel
-        let integrationModel
-        let integrationUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  Integration.forge(integrationConfig({ bot_id: botModel.get('id') }))
-                    .save()
-                    .then((integration) => {
-                      integrationModel = integration
-                      integrationUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/integrations/${integration.get('id')}`
-                      done()
-                    })
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          integrationModel.destroy()
-            .then(() => botModel.destroy())
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should delete the bot', (done) => {
             server.inject({
@@ -456,7 +283,7 @@ describe('Hapi Server', () => {
               headers: {
                 'x-access-token': jwt.sign({
                   id: userModel.get('id'),
-                  email: userModel.get('email'),
+                  integration: userModel.get('integration'),
                 }, process.env.ENCRYPTION_KEY),
               },
             }, (res) => {

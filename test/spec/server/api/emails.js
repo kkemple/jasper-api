@@ -28,49 +28,51 @@ describe('Hapi Server', () => {
   })
 
   describe('Api Plugin', () => {
-    describe('Emails Endpoint', () => {
-      describe('GET /api/users/{userId}/bots/{botId}/emails', () => {
-        let userModel
-        let botModel
-        let emailModel
-        let emailUrl
+    let userModel
+    let botModel
+    let emailUrl
+    let emailsUrl
 
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
+    beforeEach((done) => {
+      User.forge(userConfig({ password: 'test' }))
+        .save()
+        .then((user) => {
+          userModel = user
+
+          Bot.forge(botConfig({ user_id: userModel.get('id') }))
             .save()
-            .then((user) => {
-              userModel = user
+            .then((bot) => {
+              botModel = bot
 
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
+              Email.forge(emailConfig({ bot_id: botModel.get('id') }))
                 .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  Email.forge(emailConfig({ bot_id: botModel.get('id') }))
-                    .save()
-                    .then((email) => {
-                      emailModel = email
-                      emailUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/emails`
-                      done()
-                    })
+                .then((email) => {
+                  emailUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/emails/${email.get('id')}`
+                  emailsUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/emails`
+                  done()
                 })
             })
-            .catch(done)
         })
+        .catch(done)
+    })
 
-        after((done) => {
-          emailModel.destroy()
-            .then(() => botModel.destroy())
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
+    afterEach((done) => {
+      Email.collection()
+        .fetch()
+        .then((emails) => emails.invokeThen('destroy'))
+        .then(() => botModel.destroy())
+        .then(() => userModel.destroy())
+        .then(() => done())
+        .catch(done)
+    })
 
+    describe('Emails Endpoint', () => {
+      describe('GET /api/users/{userId}/bots/{botId}/emails', () => {
         describe('with a valid token', () => {
           it('should return emails belonging to bot', (done) => {
             server.inject({
               method: 'GET',
-              url: emailUrl,
+              url: emailsUrl,
               headers: {
                 'x-access-token': jwt.sign({
                   id: userModel.get('id'),
@@ -104,42 +106,6 @@ describe('Hapi Server', () => {
       })
 
       describe('GET /api/users/{userId}/bots/{botId}/emails/{emailId}', () => {
-        let userModel
-        let botModel
-        let emailModel
-        let emailUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  Email.forge(emailConfig({ bot_id: botModel.get('id') }))
-                    .save()
-                    .then((email) => {
-                      emailModel = email
-                      emailUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/emails/${email.get('id')}`
-                      done()
-                    })
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          emailModel.destroy()
-            .then(() => botModel.destroy())
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return email data', (done) => {
             server.inject({
@@ -178,37 +144,6 @@ describe('Hapi Server', () => {
       })
 
       describe('POST /api/users/{userId}/bots/{botId}/emails', () => {
-        let userModel
-        let botModel
-        let emailsUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-                  emailsUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/emails`
-                  done()
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          Email.collection()
-            .fetch()
-            .then((emails) => emails.invokeThen('destroy'))
-            .then(() => botModel.destroy())
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return newly created email', (done) => {
             server.inject({
@@ -250,42 +185,6 @@ describe('Hapi Server', () => {
       })
 
       describe('PATCH /api/users/{userId}/bots/{botId}/emails/{emailId}', () => {
-        let userModel
-        let botModel
-        let emailModel
-        let emailUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  Email.forge(emailConfig({ bot_id: botModel.get('id') }))
-                    .save()
-                    .then((email) => {
-                      emailModel = email
-                      emailUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/emails/${email.get('id')}`
-                      done()
-                    })
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          emailModel.destroy()
-            .then(() => botModel.destroy())
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return an updated email', (done) => {
             server.inject({
@@ -329,42 +228,6 @@ describe('Hapi Server', () => {
       })
 
       describe('PUT /api/users/{userId}/bots/{botId}/emails/{emailId}', () => {
-        let userModel
-        let botModel
-        let emailModel
-        let emailUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  Email.forge(emailConfig({ bot_id: botModel.get('id') }))
-                    .save()
-                    .then((email) => {
-                      emailModel = email
-                      emailUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/emails/${email.get('id')}`
-                      done()
-                    })
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          emailModel.destroy()
-            .then(() => botModel.destroy())
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return an updated email', (done) => {
             server.inject({
@@ -407,42 +270,6 @@ describe('Hapi Server', () => {
       })
 
       describe('DELETE /api/users/{userId}/bots/{botId}/emails/{emailId}', () => {
-        let userModel
-        let botModel
-        let emailModel
-        let emailUrl
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-
-              Bot.forge(botConfig({ user_id: userModel.get('id') }))
-                .save()
-                .then((bot) => {
-                  botModel = bot
-
-                  Email.forge(emailConfig({ bot_id: botModel.get('id') }))
-                    .save()
-                    .then((email) => {
-                      emailModel = email
-                      emailUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/emails/${email.get('id')}`
-                      done()
-                    })
-                })
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          emailModel.destroy()
-            .then(() => botModel.destroy())
-            .then(() => userModel.destroy())
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should delete the bot', (done) => {
             server.inject({

@@ -12,6 +12,11 @@ chai.should()
 
 const { User } = models
 
+const createUser = () => {
+  return User.forge(userConfig({ password: 'test' }))
+    .save()
+}
+
 describe('Hapi Server', () => {
   let server
 
@@ -25,25 +30,22 @@ describe('Hapi Server', () => {
   })
 
   describe('Api Plugin', () => {
+    let userModel
+
+    beforeEach((done) => {
+      createUser()
+        .then((user) => userModel = user)
+        .then(() => done())
+        .catch(done)
+    })
+
+    afterEach((done) => {
+      userModel.destroy()
+        .then(() => done())
+        .catch(done)
+    })
+
     describe('POST /api/authenticate', () => {
-      let userModel
-
-      before((done) => {
-        User.forge(userConfig({ password: 'test' }))
-          .save()
-          .then((user) => {
-            userModel = user
-            done()
-          })
-          .catch(done)
-      })
-
-      after((done) => {
-        userModel.destroy()
-          .then(() => done())
-          .catch(done)
-      })
-
       describe('with valid email and password', () => {
         it('should return with a valid response', (done) => {
           server.inject({
@@ -85,24 +87,6 @@ describe('Hapi Server', () => {
 
     describe('User Endpoint', () => {
       describe('GET /api/users/{id}', () => {
-        let userModel
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-              done()
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          userModel.destroy()
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return a valid response', (done) => {
             server.inject({
@@ -141,24 +125,6 @@ describe('Hapi Server', () => {
       })
 
       describe('PATCH /api/users/{id}', () => {
-        let userModel
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-              done()
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          userModel.destroy()
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return an updated user', (done) => {
             server.inject({
@@ -201,24 +167,6 @@ describe('Hapi Server', () => {
       })
 
       describe('PUT /api/users/{id}', () => {
-        let userModel
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-              done()
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          userModel.destroy()
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should return an updated user', (done) => {
             server.inject({
@@ -262,24 +210,6 @@ describe('Hapi Server', () => {
       })
 
       describe('DELETE /api/users/{id}', () => {
-        let userModel
-
-        before((done) => {
-          User.forge(userConfig({ password: 'test' }))
-            .save()
-            .then((user) => {
-              userModel = user
-              done()
-            })
-            .catch(done)
-        })
-
-        after((done) => {
-          userModel.destroy()
-            .then(() => done())
-            .catch(done)
-        })
-
         describe('with a valid token', () => {
           it('should delete the user', (done) => {
             server.inject({
