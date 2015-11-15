@@ -1,7 +1,7 @@
-import Promise from 'bluebird'
+import wolframResponse from '../wolfram-response'
 
 export default {
-  search: (speech) => {
-    return Promise.resolve({ speech })
+  search: (speech, params, resolvedQuery) => {
+    return wolframResponse(speech, params, resolvedQuery)
   },
 }

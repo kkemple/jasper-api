@@ -6,8 +6,8 @@ export default {
   currency: (speech) => {
     return Promise.resolve({ speech })
   },
-  math: (speech) => {
-    return Promise.resolve({ speech })
+  math: (speech, params, resolvedQuery) => {
+    return wolframAlpha(resolvedQuery)
   },
   tips: (speech) => {
     return Promise.resolve({ speech })

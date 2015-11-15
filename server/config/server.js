@@ -10,6 +10,8 @@ const goodOptions = process.env.NODE_ENV === 'test' ? {} : {
 export default [
   { register: require('good'), options: goodOptions },
   { register: require('../plugins/twilio') },
+  { register: require('../plugins/mailgun') },
+  { register: require('../plugins/slack') },
   { register: require('../plugins/oauth') },
   { register: require('../plugins/logging') },
   { register: require('../plugins/api/users') },
