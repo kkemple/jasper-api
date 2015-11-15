@@ -63,7 +63,7 @@ const processSkynetResponse = (req, reply) => (response) => {
 export const register = (server, options, next) => {
   server.route({
     method: 'POST',
-    path: '/mailgun',
+    path: '/mailgun/email',
     handler(req, reply) {
       skynet(req.payload['body-plain'])
         .then(processSkynetResponse(req, reply))

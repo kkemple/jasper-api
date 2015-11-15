@@ -6,7 +6,9 @@ import logger from '../../../logger'
 const slackToken = process.env.SLACK_VERIFICATION_TOKEN
 
 const processSkynetResponse = (req, reply) => (response) => {
-  const text = response.speech
+  const text = (response.speech !== '') ?
+    response.speech :
+    'I was unable to process that request'
   let attachments = []
 
   if (response.images) {
