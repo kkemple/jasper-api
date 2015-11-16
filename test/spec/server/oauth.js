@@ -1,28 +1,21 @@
 import chai from 'chai'
-import Hapi from 'hapi'
-import Joi from 'joi'
-import jwt from 'jsonwebtoken'
 import nock from 'nock'
 
-import models from '../../../models'
+import { User, Bot } from '../../../models'
 import { userConfig, botConfig } from '../../helpers/config'
-import { oauthSuccessSchema } from '../../validations'
-import config from '../../../server/config/server'
+
+import { getServer, loadPlugins } from '../../../server'
 
 chai.should()
-
-const { User, Bot, Integration } = models
 
 describe('Hapi Server', () => {
   let server
 
   before((done) => {
-    server = new Hapi.Server()
-    server.connection({ host: 'localhost', port: 8000 })
-    server.register(config, (err) => {
-      if (err) return done(err)
-      done()
-    })
+    server = getServer('0.0.0.0', 8080)
+    loadPlugins(server)
+      .then(() => done())
+      .catch((err) => done(err))
   })
 
   describe('OAuth Plugin', () => {
@@ -30,14 +23,16 @@ describe('Hapi Server', () => {
       let userModel
       let botModel
 
+      const data = {
+        access_token: 'access_token',
+        refresh_token: 'refresh_token',
+        expires_in: 2029,
+      }
+
       before((done) => {
         nock('https://accounts.spotify.com')
           .post('/api/token')
-          .reply(200, {
-            access_token: 'access_token',
-            refresh_token: 'refresh_token',
-            expires_in: 2029,
-          })
+          .reply(200, data)
 
         new User(userConfig())
           .save()
@@ -54,12 +49,7 @@ describe('Hapi Server', () => {
       })
 
       after((done) => {
-        Integration
-          .fetchAll()
-          .then((integrations) => Promise.all(
-            integrations.map((int) => int.destroy())
-          ))
-          .then(() => botModel.destroy())
+        botModel.destroy()
           .then(() => userModel.destroy())
           .then(() => done())
           .catch((err) => done(err))
@@ -77,19 +67,12 @@ describe('Hapi Server', () => {
             bot_id: botModel.get('id'),
           },
           headers: {
-            'x-access-token': jwt.sign({
-              id: userModel.get('id'),
-              email: userModel.get('email'),
-            }, process.env.ENCRYPTION_KEY),
+            authorization: `Bearer ${userModel.token()}`,
           },
         }, (res) => {
-          Joi.validate(res.payload, oauthSuccessSchema, (err) => {
-            if (err) {
-              done(err)
-              return
-            }
-            done()
-          })
+          const payload = JSON.parse(res.payload)
+          payload.access_token.should.eq(data.access_token)
+          done()
         })
       })
     })

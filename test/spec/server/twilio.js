@@ -1,8 +1,7 @@
 import chai from 'chai'
-import Hapi from 'hapi'
 import nock from 'nock'
 
-import config from '../../../server/config/server'
+import { getServer, loadPlugins } from '../../../server'
 
 chai.should()
 
@@ -15,12 +14,10 @@ describe('Hapi Server', () => {
   let server
 
   before((done) => {
-    server = new Hapi.Server()
-    server.connection({ host: 'localhost', port: 8000 })
-    server.register(config, (err) => {
-      if (err) return done(err)
-      done()
-    })
+    server = getServer('0.0.0.0', 8080)
+    loadPlugins(server)
+      .then(() => done())
+      .catch((err) => done(err))
   })
 
   describe('Twilio Plugin', () => {

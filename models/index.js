@@ -1,6 +1,9 @@
-import User from './user'
-import Bot from './bot'
-import Integration from './integration'
-import Email from './email'
+import UserModel from './user'
+import BotModel from './bot'
+import IntegrationModel from './integration'
+import EmailModel from './email'
 
-export default { User, Bot, Integration, Email }
+export const User = UserModel
+export const Bot = BotModel
+export const Integration = IntegrationModel
+export const Email = EmailModel

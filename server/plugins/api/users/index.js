@@ -1,28 +1,20 @@
-import models from '../../../models'
-import verifyUser from '../../verify-user'
-import verifyToken from '../../verify-token'
+import { User } from '../../../../models'
 import {
   authenticationPayload,
-  headers,
   userPostPayload,
   userParams,
-} from '../../../validations'
+} from '../../../../validations'
 
-const { User } = models
-
-const deleteUser = (token) => {
-  return new User({ id: token.id, email: token.email })
-    .destroy()
+const deleteUser = (user) => {
+  return user.destroy()
 }
 
-const patchUser = (token, payload) => {
-  return new User({ id: token.id, email: token.email })
-    .save(payload, { patch: true })
+const patchUser = (user, payload) => {
+  return user.save(payload, { patch: true })
 }
 
-const putUser = (token, payload) => {
-  return new User({ id: token.id, email: token.email })
-    .save(payload)
+const putUser = (user, payload) => {
+  return user.save(payload)
 }
 
 export const register = (server, options, next) => {
@@ -31,16 +23,34 @@ export const register = (server, options, next) => {
       method: 'POST',
       path: '/api/authenticate',
       config: {
+        auth: false,
         validate: {
           payload: authenticationPayload,
         },
         handler(req, reply) {
           User.authenticate(req.payload.email, req.payload.password)
-            .then((token) => reply({
-              success: true,
-              payload: { token },
-              timestamp: Date.now(),
-            }))
+            .then((user) => {
+              const token = user.token()
+
+              const response = {
+                success: true,
+                payload: { token },
+                timestamp: Date.now(),
+              }
+
+              const cookieOptions = {
+                ttl: 365 * 24 * 60 * 60 * 1000, // expires a year from today
+                encoding: 'none',    // we already used JWT to encode
+                isSecure: true,      // warm & fuzzy feelings
+                isHttpOnly: true,    // prevent client alteration
+                clearInvalid: false, // remove invalid cookies
+                strictHeader: true,  // don't allow violations of RFC 6265
+              }
+
+              reply(response)
+                .header('Authorization', token)
+                .state('token', token, cookieOptions)
+            })
             .catch((err) => reply({
               success: false,
               error: err.name,
@@ -56,13 +66,10 @@ export const register = (server, options, next) => {
       path: '/api/users/{id}',
       config: {
         validate: {
-          headers: headers,
           params: userParams,
         },
         handler(req, reply) {
-          verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.id, token))
-            .then((token) => User.profile(token.id, token.email))
+          req.auth.credentials.user.profile()
             .then((user) => reply({
               success: true,
               payload: { user },
@@ -88,7 +95,7 @@ export const register = (server, options, next) => {
         handler(req, reply) {
           User.forge(req.payload)
             .save()
-            .then((user) => User.profile(user.get('id'), user.get('email')))
+            .then((user) => user.profile())
             .then((user) => reply({
               success: true,
               payload: { user },
@@ -109,13 +116,10 @@ export const register = (server, options, next) => {
       path: '/api/users/{id}',
       config: {
         validate: {
-          headers: headers,
           params: userParams,
         },
         handler(req, reply) {
-          verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.id, token))
-            .then((token) => patchUser(token, req.payload))
+          patchUser(req.auth.credentials.user, req.payload)
             .then((user) => User.profile(user.get('id'), user.get('email')))
             .then((user) => reply({
               success: true,
@@ -137,13 +141,10 @@ export const register = (server, options, next) => {
       path: '/api/users/{id}',
       config: {
         validate: {
-          headers: headers,
           params: userParams,
         },
         handler(req, reply) {
-          verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.id, token))
-            .then((token) => putUser(token, req.payload))
+          putUser(req.auth.credentials.user, req.payload)
             .then((user) => User.profile(user.get('id'), user.get('email')))
             .then((user) => reply({
               success: true,
@@ -165,13 +166,10 @@ export const register = (server, options, next) => {
       path: '/api/users/{id}',
       config: {
         validate: {
-          headers: headers,
           params: userParams,
         },
         handler(req, reply) {
-          verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(req.params.id, token))
-            .then((token) => deleteUser(token))
+          deleteUser(req.auth.credentials.user)
             .then(() => reply({
               success: true,
               timestamp: Date.now(),

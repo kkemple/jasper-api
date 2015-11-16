@@ -1,12 +1,7 @@
 import logger from './logger'
-import server from './server'
-import serverConfig from './server/config/server'
+import { getServer, loadPlugins, start } from './server'
 
-server.register(serverConfig, (err) => {
-  if (err) return logger.error(err)
-
-  server.start((startErr) => {
-    if (startErr) return logger.error(startErr)
-    logger.info('server started')
-  })
-})
+loadPlugins(getServer())
+  .then((server) => start(server))
+  .then(() => logger.info('server started'))
+  .catch((err) => logger.error(err))

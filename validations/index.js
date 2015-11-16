@@ -28,12 +28,9 @@ export const userParams = {
 
 export const botPostPayload = {
   name: Joi.string().required(),
-  phone_number: Joi.string().required(),
-  user_id: Joi.number().required(),
 }
 
 export const botParams = {
-  userId: Joi.number().required(),
   botId: Joi.number().required(),
 }
 
@@ -45,7 +42,6 @@ export const integrationPostPayload = {
 }
 
 export const integrationParams = {
-  userId: Joi.number().required(),
   botId: Joi.number().required(),
   integrationId: Joi.number().required(),
 }
@@ -55,7 +51,6 @@ export const emailPostPayload = {
 }
 
 export const emailParams = {
-  userId: Joi.number().required(),
   botId: Joi.number().required(),
   emailId: Joi.number().required(),
 }

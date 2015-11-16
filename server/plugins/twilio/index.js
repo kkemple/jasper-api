@@ -48,10 +48,13 @@ export const register = (server, options, next) => {
   server.route({
     method: 'POST',
     path: '/twilio/sms',
-    handler(request, reply) {
-      skynet(request.payload.Body)
-        .then(processSkynetResponse(request, reply))
-        .catch((err) => logger.error(err))
+    config: {
+      auth: false,
+      handler(request, reply) {
+        skynet(request.payload.Body)
+          .then(processSkynetResponse(request, reply))
+          .catch((err) => logger.error(err))
+      },
     },
   })
 

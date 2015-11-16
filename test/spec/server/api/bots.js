@@ -1,30 +1,40 @@
 import chai from 'chai'
-import Hapi from 'hapi'
 import Joi from 'joi'
-import jwt from 'jsonwebtoken'
+import nock from 'nock'
 
 import {
   botGetSuccessSchema,
   botsGetSuccessSchema,
 } from '../../../validations'
-import config from '../../../../server/config/server'
-import models from '../../../../models'
+import { User, Bot } from '../../../../models'
 import { userConfig, botConfig } from '../../../helpers/config'
+
+import { getServer, loadPlugins } from '../../../../server'
 
 chai.should()
 
-const { User, Bot } = models
+const twilioId = process.env.TWILIO_ACCOUNT_SID
+const listNumbersUrl = `/Accounts/${twilioId}/AvailablePhoneNumbers/US/Local.json`
+const createNumberUrl = `/Accounts/${twilioId}/IncomingPhoneNumbers.json`
+
+const numbers = {
+  availablePhoneNumbers: [
+    { phoneNumber: '+15555555555' },
+  ],
+}
+
+const number = {
+  phoneNumber: '+15555555555',
+}
 
 describe('Hapi Server', () => {
   let server
 
   before((done) => {
-    server = new Hapi.Server()
-    server.connection({ host: 'localhost', port: 8000 })
-    server.register(config, (err) => {
-      if (err) return done(err)
-      done()
-    })
+    server = getServer('0.0.0.0', 8080)
+    loadPlugins(server)
+      .then(() => done())
+      .catch((err) => done(err))
   })
 
   describe('Api Plugin', () => {
@@ -43,8 +53,8 @@ describe('Hapi Server', () => {
             .save()
             .then((bot) => {
               botModel = bot
-              botUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}`
-              botsUrl = `/api/users/${userModel.get('id')}/bots`
+              botUrl = `/api/bots/${botModel.get('id')}`
+              botsUrl = `/api/bots`
               done()
             })
         })
@@ -61,17 +71,14 @@ describe('Hapi Server', () => {
     })
 
     describe('Bots Endpoint', () => {
-      describe('GET /api/users/{userId}/bots', () => {
+      describe('GET /api/bots', () => {
         describe('with a valid token', () => {
           it('should return bots belonging to user', (done) => {
             server.inject({
               method: 'GET',
               url: botsUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -85,31 +92,28 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'GET',
               url: botUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('GET /api/users/{userId}/bots/{botId}', () => {
+      describe('GET /api/bots/{botId}', () => {
         describe('with a valid token', () => {
           it('should return bot data', (done) => {
             server.inject({
               method: 'GET',
               url: botUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -123,36 +127,42 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'GET',
               url: botUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('POST /api/users/{userId}/bots', () => {
+      describe('POST /api/bots', () => {
         describe('with a valid token', () => {
+          beforeEach(() => {
+            nock('https://api.twilio.com/2010-04-01')
+              .get(listNumbersUrl)
+              .query(true)
+              .reply(200, numbers)
+
+            nock('https://api.twilio.com/2010-04-01')
+              .post(createNumberUrl)
+              .reply(200, number)
+          })
+
           it('should return newly created bot', (done) => {
             server.inject({
               method: 'POST',
               url: botsUrl,
               payload: {
                 name: 'test-bot',
-                phone_number: '+15555555555',
-                user_id: userModel.get('id'),
               },
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -166,31 +176,31 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'POST',
-              url: `/api/users/${userModel.get('id')}/bots`,
+              url: botsUrl,
+              payload: {
+                name: 'test-bot',
+              },
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('PATCH /api/users/{userId}/bots/{botId}', () => {
+      describe('PATCH /api/bots/{botId}', () => {
         describe('with a valid token', () => {
           it('should return an updated bot', (done) => {
             server.inject({
               method: 'PATCH',
               url: botUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
               payload: {
                 name: 'test-bot-3',
@@ -208,40 +218,35 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PATCH',
               url: botUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('PUT /api/users/{userId}/bots/{botId}', () => {
+      describe('PUT /api/bots/{botId}', () => {
         describe('with a valid token', () => {
           it('should return an updated bot', (done) => {
             server.inject({
               method: 'PUT',
               url: botUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
               payload: {
                 name: 'test-bot-3',
-                phone_number: '+18888888888',
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
               payload.payload.bot.name.should.eq('test-bot-3')
-              payload.payload.bot.phone_number.should.eq('+18888888888')
 
               Joi.validate(payload, botGetSuccessSchema, (err) => {
                 if (err) return done(err)
@@ -252,31 +257,28 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PUT',
               url: botUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('DELETE /api/users/{userId}/bots/{botId}', () => {
+      describe('DELETE /api/bots/{botId}', () => {
         describe('with a valid token', () => {
           it('should delete the bot', (done) => {
             server.inject({
               method: 'DELETE',
               url: botUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -287,14 +289,14 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'DELETE',
               url: botUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })

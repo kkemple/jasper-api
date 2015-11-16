@@ -29,15 +29,18 @@ export const register = (server, options, next) => {
   server.route({
     method: 'POST',
     path: '/slack/messages',
-    handler(req, reply) {
-      if (req.payload.token !== slackToken) {
-        reply('Unauthorized!')
-        return
-      }
+    config: {
+      auth: false,
+      handler(req, reply) {
+        if (req.payload.token !== slackToken) {
+          reply('Unauthorized!')
+          return
+        }
 
-      skynet(req.payload.text)
-        .then(processSkynetResponse(req, reply))
-        .catch((err) => logger.error(err))
+        skynet(req.payload.text)
+          .then(processSkynetResponse(req, reply))
+          .catch((err) => logger.error(err))
+      },
     },
   })
 

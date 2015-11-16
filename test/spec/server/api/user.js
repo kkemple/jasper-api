@@ -1,16 +1,13 @@
 import chai from 'chai'
-import Hapi from 'hapi'
 import Joi from 'joi'
-import jwt from 'jsonwebtoken'
 
 import { authSuccessSchema, userGetSuccessSchema } from '../../../validations'
-import config from '../../../../server/config/server'
-import models from '../../../../models'
+import { User } from '../../../../models'
 import { userConfig } from '../../../helpers/config'
 
-chai.should()
+import { getServer, loadPlugins } from '../../../../server'
 
-const { User } = models
+chai.should()
 
 const createUser = () => {
   return User.forge(userConfig({ password: 'test' }))
@@ -21,12 +18,10 @@ describe('Hapi Server', () => {
   let server
 
   before((done) => {
-    server = new Hapi.Server()
-    server.connection({ host: 'localhost', port: 8000 })
-    server.register(config, (err) => {
-      if (err) return done(err)
-      done()
-    })
+    server = getServer('0.0.0.0', 8080)
+    loadPlugins(server)
+      .then(() => done())
+      .catch((err) => done(err))
   })
 
   describe('Api Plugin', () => {
@@ -93,10 +88,7 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: `/api/users/${userModel.get('id')}`,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -110,14 +102,14 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'GET',
               url: `/api/users/${userModel.get('id')}`,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
@@ -131,10 +123,7 @@ describe('Hapi Server', () => {
               method: 'PATCH',
               url: `/api/users/${userModel.get('id')}`,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
               payload: {
                 email: 'test@releasable.io',
@@ -152,14 +141,14 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'GET',
               url: `/api/users/${userModel.get('id')}`,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
@@ -173,10 +162,7 @@ describe('Hapi Server', () => {
               method: 'PUT',
               url: `/api/users/${userModel.get('id')}`,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
               payload: {
                 email: 'test@releasable.io',
@@ -195,14 +181,14 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'GET',
               url: `/api/users/${userModel.get('id')}`,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
@@ -216,10 +202,7 @@ describe('Hapi Server', () => {
               method: 'DELETE',
               url: `/api/users/${userModel.get('id')}`,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -230,14 +213,14 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'DELETE',
               url: `/api/users/${userModel.get('id')}`,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })

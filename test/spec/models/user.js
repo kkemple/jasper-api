@@ -1,11 +1,8 @@
 import chai from 'chai'
-import jwt from 'jsonwebtoken'
 
-import models from '../../../models'
+import { User } from '../../../models'
 
 chai.should()
-
-const { User } = models
 
 describe('Models', () => {
   describe('User', () => {
@@ -29,25 +26,11 @@ describe('Models', () => {
             .catch(done)
         })
 
-        it('should return a valid JWT', (done) => {
+        it('should return authenticated user', (done) => {
           User.authenticate('skynet@releasable.io', 'test')
-            .then((token) => {
-              token.should.be.a('string')
-
-              jwt.verify(
-                token,
-                process.env.ENCRYPTION_KEY,
-                (err, decoded) => {
-                  if (err) {
-                    done(err)
-                    return
-                  }
-
-                  decoded.email.should.eq('skynet@releasable.io')
-                  decoded.id.should.eq(userModel.get('id'))
-                  done()
-                }
-              )
+            .then((user) => {
+              user.get('email').should.eq('skynet@releasable.io')
+              done()
             })
         })
       })

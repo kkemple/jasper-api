@@ -64,10 +64,13 @@ export const register = (server, options, next) => {
   server.route({
     method: 'POST',
     path: '/mailgun/email',
-    handler(req, reply) {
-      skynet(req.payload['body-plain'])
-        .then(processSkynetResponse(req, reply))
-        .catch((err) => logger.error(err))
+    config: {
+      auth: false,
+      handler(req, reply) {
+        skynet(req.payload['body-plain'])
+          .then(processSkynetResponse(req, reply))
+          .catch((err) => logger.error(err))
+      },
     },
   })
 

@@ -1,23 +1,18 @@
 import assign from 'lodash.assign'
 
-import models from '../../../models'
-import verifyUser from '../../verify-user'
-import verifyToken from '../../verify-token'
+import { Integration } from '../../../../models'
 import {
-  headers,
   botParams,
   integrationPostPayload,
   integrationParams,
-} from '../../../validations'
+} from '../../../../validations'
 
-const { Integration, Bot } = models
-
-const getBot = (userId, botId) => {
-  return new Bot({ user_id: userId, id: botId }).fetch()
+const getBot = (user, botId) => {
+  return user.bots().fetchOne({ id: botId }, { required: true })
 }
 
 const getIntegration = (bot, integrationId) => {
-  return bot.integrations().fetchOne({ id: integrationId })
+  return bot.integrations().fetchOne({ id: integrationId }, { required: true })
 }
 
 const getIntegrations = (bot) => {
@@ -28,8 +23,10 @@ const getIntegrationProfiles = (integrations) => {
   return integrations.toJSON()
 }
 
-const createIntegration = (botId, payload) => {
-  return Integration.forge(assign({}, { bot_id: botId }, payload)).save()
+const createIntegration = (bot, payload) => {
+  return Integration
+    .forge(assign({}, { bot_id: bot.get('id') }, payload))
+    .save()
 }
 
 const patchIntegration = (integration, payload) => {
@@ -44,18 +41,15 @@ export const register = (server, options, next) => {
   server.route([
     {
       method: 'GET',
-      path: '/api/users/{userId}/bots/{botId}/integrations',
+      path: '/api/bots/{botId}/integrations',
       config: {
         validate: {
-          headers: headers,
           params: botParams,
         },
         handler(req, reply) {
-          const { userId, botId } = req.params
+          const { botId } = req.params
 
-          verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(userId, token))
-            .then(() => getBot(userId, botId))
+          getBot(req.auth.credentials.user, botId)
             .then((bot) => getIntegrations(bot))
             .then((integrations) => getIntegrationProfiles(integrations))
             .then((integrations) => reply({
@@ -75,18 +69,15 @@ export const register = (server, options, next) => {
     },
     {
       method: 'GET',
-      path: '/api/users/{userId}/bots/{botId}/integrations/{integrationId}',
+      path: '/api/bots/{botId}/integrations/{integrationId}',
       config: {
         validate: {
-          headers: headers,
           params: integrationParams,
         },
         handler(req, reply) {
-          const { userId, botId, integrationId } = req.params
+          const { botId, integrationId } = req.params
 
-          verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(userId, token))
-            .then(() => getBot(userId, botId))
+          getBot(req.auth.credentials.user, botId)
             .then((bot) => getIntegration(bot, integrationId))
             .then((integration) => integration.toJSON())
             .then((integration) => reply({
@@ -106,14 +97,17 @@ export const register = (server, options, next) => {
     },
     {
       method: 'POST',
-      path: '/api/users/{userId}/bots/{botId}/integrations',
+      path: '/api/bots/{botId}/integrations',
       config: {
         validate: {
           params: botParams,
           payload: integrationPostPayload,
         },
         handler(req, reply) {
-          createIntegration(req.params.botId, req.payload)
+          const { botId } = req.params
+
+          getBot(req.auth.credentials.user, botId)
+            .then((bot) => createIntegration(bot, req.payload))
             .then((integration) => integration.fetch())
             .then((integration) => reply({
               success: true,
@@ -132,19 +126,16 @@ export const register = (server, options, next) => {
     },
     {
       method: 'PATCH',
-      path: '/api/users/{userId}/bots/{botId}/integrations/{integrationId}',
+      path: '/api/bots/{botId}/integrations/{integrationId}',
       config: {
         validate: {
-          headers: headers,
           params: integrationParams,
         },
         handler(req, reply) {
-          const { userId, botId, integrationId } = req.params
+          const { botId, integrationId } = req.params
           const { payload } = req
 
-          verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(userId, token))
-            .then(() => getBot(userId, botId))
+          getBot(req.auth.credentials.user, botId)
             .then((bot) => getIntegration(bot, integrationId))
             .then((integration) => patchIntegration(integration, payload))
             .then((integration) => integration.toJSON())
@@ -165,19 +156,16 @@ export const register = (server, options, next) => {
     },
     {
       method: 'PUT',
-      path: '/api/users/{userId}/bots/{botId}/integrations/{integrationId}',
+      path: '/api/bots/{botId}/integrations/{integrationId}',
       config: {
         validate: {
-          headers: headers,
           params: integrationParams,
         },
         handler(req, reply) {
-          const { userId, botId, integrationId } = req.params
+          const { botId, integrationId } = req.params
           const { payload } = req
 
-          verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(userId, token))
-            .then(() => getBot(userId, botId))
+          getBot(req.auth.credentials.user, botId)
             .then((bot) => getIntegration(bot, integrationId))
             .then((integration) => putIntegration(integration, payload))
             .then((integration) => integration.toJSON())
@@ -198,18 +186,15 @@ export const register = (server, options, next) => {
     },
     {
       method: 'DELETE',
-      path: '/api/users/{userId}/bots/{botId}/integrations/{integrationId}',
+      path: '/api/bots/{botId}/integrations/{integrationId}',
       config: {
         validate: {
-          headers: headers,
           params: integrationParams,
         },
         handler(req, reply) {
-          const { userId, botId, integrationId } = req.params
+          const { botId, integrationId } = req.params
 
-          verifyToken(req.headers['x-access-token'])
-            .then((token) => verifyUser(userId, token))
-            .then(() => getBot(userId, botId))
+          getBot(req.auth.credentials.user, botId)
             .then((bot) => getIntegration(bot, integrationId))
             .then((integration) => integration.destroy())
             .then(() => reply({

@@ -1,30 +1,25 @@
 import chai from 'chai'
-import Hapi from 'hapi'
 import Joi from 'joi'
-import jwt from 'jsonwebtoken'
 
 import {
   integrationGetSuccessSchema,
   integrationsGetSuccessSchema,
 } from '../../../validations'
-import config from '../../../../server/config/server'
-import models from '../../../../models'
+import { User, Bot, Integration } from '../../../../models'
 import { userConfig, botConfig, integrationConfig } from '../../../helpers/config'
 
-chai.should()
+import { getServer, loadPlugins } from '../../../../server'
 
-const { User, Bot, Integration } = models
+chai.should()
 
 describe('Hapi Server', () => {
   let server
 
   before((done) => {
-    server = new Hapi.Server()
-    server.connection({ host: 'localhost', port: 8000 })
-    server.register(config, (err) => {
-      if (err) return done(err)
-      done()
-    })
+    server = getServer('0.0.0.0', 8080)
+    loadPlugins(server)
+      .then(() => done())
+      .catch((err) => done(err))
   })
 
   describe('Api Plugin', () => {
@@ -47,8 +42,8 @@ describe('Hapi Server', () => {
               Integration.forge(integrationConfig({ bot_id: botModel.get('id') }))
                 .save()
                 .then((integration) => {
-                  integrationUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/integrations/${integration.get('id')}`
-                  integrationsUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/integrations`
+                  integrationUrl = `/api/bots/${botModel.get('id')}/integrations/${integration.get('id')}`
+                  integrationsUrl = `/api/bots/${botModel.get('id')}/integrations`
                   done()
                 })
             })
@@ -67,17 +62,14 @@ describe('Hapi Server', () => {
     })
 
     describe('Integrations Endpoint', () => {
-      describe('GET /api/users/{userId}/bots/{botId}/integrations', () => {
+      describe('GET /api/bots/{botId}/integrations', () => {
         describe('with a valid token', () => {
           it('should return integrations belonging to bot', (done) => {
             server.inject({
               method: 'GET',
               url: integrationsUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  integration: userModel.get('integration'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -91,31 +83,28 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'GET',
               url: integrationUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('GET /api/users/{userId}/bots/{botId}/integrations/{integrationId}', () => {
+      describe('GET /api/bots/{botId}/integrations/{integrationId}', () => {
         describe('with a valid token', () => {
           it('should return integration data', (done) => {
             server.inject({
               method: 'GET',
               url: integrationUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  integration: userModel.get('integration'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -129,21 +118,21 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'GET',
               url: integrationUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('POST /api/users/{userId}/bots/{botId}/integrations', () => {
+      describe('POST /api/bots/{botId}/integrations', () => {
         describe('with a valid token', () => {
           it('should return newly created integration', (done) => {
             server.inject({
@@ -156,10 +145,7 @@ describe('Hapi Server', () => {
                 expires_in: 1000,
               },
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  integration: userModel.get('integration'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -180,24 +166,21 @@ describe('Hapi Server', () => {
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('PATCH /api/users/{userId}/bots/{botId}/integrations/{integrationId}', () => {
+      describe('PATCH /api/bots/{botId}/integrations/{integrationId}', () => {
         describe('with a valid token', () => {
           it('should return an updated integration', (done) => {
             server.inject({
               method: 'PATCH',
               url: integrationUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  integration: userModel.get('integration'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
               payload: {
                 type: 'test-3',
@@ -216,31 +199,28 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PATCH',
               url: integrationUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('PUT /api/users/{userId}/bots/{botId}/integrations/{integrationId}', () => {
+      describe('PUT /api/bots/{botId}/integrations/{integrationId}', () => {
         describe('with a valid token', () => {
           it('should return an updated integration', (done) => {
             server.inject({
               method: 'PUT',
               url: integrationUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  integration: userModel.get('integration'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
               payload: {
                 type: 'test-3',
@@ -260,31 +240,28 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PUT',
               url: integrationUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('DELETE /api/users/{userId}/bots/{botId}/integrations/{integrationId}', () => {
+      describe('DELETE /api/bots/{botId}/integrations/{integrationId}', () => {
         describe('with a valid token', () => {
           it('should delete the bot', (done) => {
             server.inject({
               method: 'DELETE',
               url: integrationUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  integration: userModel.get('integration'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -295,14 +272,14 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'DELETE',
               url: integrationUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })

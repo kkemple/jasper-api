@@ -1,30 +1,25 @@
 import chai from 'chai'
-import Hapi from 'hapi'
 import Joi from 'joi'
-import jwt from 'jsonwebtoken'
 
 import {
   emailGetSuccessSchema,
   emailsGetSuccessSchema,
 } from '../../../validations'
-import config from '../../../../server/config/server'
-import models from '../../../../models'
+import { User, Bot, Email } from '../../../../models'
 import { userConfig, botConfig, emailConfig } from '../../../helpers/config'
 
-chai.should()
+import { getServer, loadPlugins } from '../../../../server'
 
-const { User, Bot, Email } = models
+chai.should()
 
 describe('Hapi Server', () => {
   let server
 
   before((done) => {
-    server = new Hapi.Server()
-    server.connection({ host: 'localhost', port: 8000 })
-    server.register(config, (err) => {
-      if (err) return done(err)
-      done()
-    })
+    server = getServer('0.0.0.0', 8080)
+    loadPlugins(server)
+      .then(() => done())
+      .catch((err) => done(err))
   })
 
   describe('Api Plugin', () => {
@@ -47,8 +42,8 @@ describe('Hapi Server', () => {
               Email.forge(emailConfig({ bot_id: botModel.get('id') }))
                 .save()
                 .then((email) => {
-                  emailUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/emails/${email.get('id')}`
-                  emailsUrl = `/api/users/${userModel.get('id')}/bots/${botModel.get('id')}/emails`
+                  emailUrl = `/api/bots/${botModel.get('id')}/emails/${email.get('id')}`
+                  emailsUrl = `/api/bots/${botModel.get('id')}/emails`
                   done()
                 })
             })
@@ -67,17 +62,14 @@ describe('Hapi Server', () => {
     })
 
     describe('Emails Endpoint', () => {
-      describe('GET /api/users/{userId}/bots/{botId}/emails', () => {
+      describe('GET /api/bots/{botId}/emails', () => {
         describe('with a valid token', () => {
           it('should return emails belonging to bot', (done) => {
             server.inject({
               method: 'GET',
               url: emailsUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -91,31 +83,28 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'GET',
               url: emailUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('GET /api/users/{userId}/bots/{botId}/emails/{emailId}', () => {
+      describe('GET /api/bots/{botId}/emails/{emailId}', () => {
         describe('with a valid token', () => {
           it('should return email data', (done) => {
             server.inject({
               method: 'GET',
               url: emailUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -129,21 +118,21 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'GET',
               url: emailUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('POST /api/users/{userId}/bots/{botId}/emails', () => {
+      describe('POST /api/bots/{botId}/emails', () => {
         describe('with a valid token', () => {
           it('should return newly created email', (done) => {
             server.inject({
@@ -153,10 +142,7 @@ describe('Hapi Server', () => {
                 email: 'test@releasable.io',
               },
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -177,24 +163,21 @@ describe('Hapi Server', () => {
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('PATCH /api/users/{userId}/bots/{botId}/emails/{emailId}', () => {
+      describe('PATCH /api/bots/{botId}/emails/{emailId}', () => {
         describe('with a valid token', () => {
           it('should return an updated email', (done) => {
             server.inject({
               method: 'PATCH',
               url: emailUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
               payload: {
                 email: 'test@releasable.io',
@@ -213,31 +196,28 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PATCH',
               url: emailUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('PUT /api/users/{userId}/bots/{botId}/emails/{emailId}', () => {
+      describe('PUT /api/bots/{botId}/emails/{emailId}', () => {
         describe('with a valid token', () => {
           it('should return an updated email', (done) => {
             server.inject({
               method: 'PUT',
               url: emailUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
               payload: {
                 email: 'test@releasable.io',
@@ -255,31 +235,28 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PUT',
               url: emailUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })
         })
       })
 
-      describe('DELETE /api/users/{userId}/bots/{botId}/emails/{emailId}', () => {
+      describe('DELETE /api/bots/{botId}/emails/{emailId}', () => {
         describe('with a valid token', () => {
           it('should delete the bot', (done) => {
             server.inject({
               method: 'DELETE',
               url: emailUrl,
               headers: {
-                'x-access-token': jwt.sign({
-                  id: userModel.get('id'),
-                  email: userModel.get('email'),
-                }, process.env.ENCRYPTION_KEY),
+                authorization: `Bearer ${userModel.token()}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -290,14 +267,14 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with an Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'DELETE',
               url: emailUrl,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
-              payload.error.should.eq('Bad Request')
+              payload.error.should.eq('Unauthorized')
               done()
             })
           })

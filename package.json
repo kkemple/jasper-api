@@ -36,6 +36,8 @@
     "good": "^6.4.0",
     "good-console": "^5.1.0",
     "hapi": "^10.5.0",
+    "hapi-auth-basic": "^4.0.0",
+    "hapi-auth-jwt2": "^5.2.0",
     "joi": "^7.0.0",
     "jsonwebtoken": "^5.4.1",
     "knex": "^0.8.6",

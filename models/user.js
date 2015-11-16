@@ -33,6 +33,12 @@ const convertPassword = (model) => {
   return Promise.resolve()
 }
 
+const buildProfile = (user, bots) => {
+  return assign({}, user.omit(['password', 'stripe_id']), {
+    bots: bots.toJSON(),
+  })
+}
+
 const config = {
   tableName: 'users',
 
@@ -44,8 +50,23 @@ const config = {
     this.on('saving', validate)
   },
 
+  token() {
+    return jwt.sign({
+      email: this.get('email'),
+      id: this.get('id'),
+    }, process.env.ENCRYPTION_KEY)
+  },
+
   bots() {
     return this.hasMany('Bot')
+  },
+
+  profile() {
+    return new Promise((res, rej) => {
+      this.bots().fetch()
+        .then((bots) => res(buildProfile(this, bots)))
+        .catch((err) => rej(err))
+    })
   },
 }
 
@@ -66,25 +87,18 @@ const virtuals = {
               return
             }
 
-            const token = jwt.sign({
-              email, id: user.get('id'),
-            }, process.env.ENCRYPTION_KEY)
-
-            res(token)
+            res(user)
           })
         })
         .catch((err) => rej(err))
     })
   },
 
+
   profile(id, email) {
     return new this({ id: id, email: email })
-      .fetch({ required: true, withRelated: 'bots' })
-      .then((user) => assign(
-        {},
-        user.omit(['password', 'stripe_id']),
-        { bots: user.related('bots').toJSON() }
-      ))
+      .fetch({ required: true })
+      .then((user) => user.profile())
   },
 }
 

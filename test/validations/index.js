@@ -35,23 +35,6 @@ export const userGetSuccessSchema = {
   }),
 }
 
-export const oauthSuccessSchema = {
-  success: Joi.boolean().invalid(false).required(),
-  timestamp: Joi.date().required(),
-  payload: Joi.object().keys({
-    id: Joi.number().required(),
-    bot_id: Joi.number().required(),
-    type: Joi.string().required(),
-    access_token: Joi.string().token().required(),
-    refresh_token: Joi.string().token().allow('').allow(null),
-    expires_in: Joi.number().allow(null),
-    active: Joi.boolean().required(),
-    extra_data: Joi.string().allow('').allow(null),
-    created_at: Joi.date().required(),
-    updated_at: Joi.date().required(),
-  }),
-}
-
 export const botGetSuccessSchema = {
   success: Joi.boolean().invalid(false).required(),
   timestamp: Joi.date().required(),
