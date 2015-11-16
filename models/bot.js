@@ -1,6 +1,18 @@
 import assign from 'lodash.assign'
+import Promise from 'bluebird'
 
 import orm from '../db'
+
+const buildProfile = (bot, integrations, emails) => {
+  return assign(
+    {},
+    bot.toJSON(),
+    {
+      integrations: integrations.pluck('type'),
+      emails: emails.pluck('email'),
+    }
+  )
+}
 
 const config = {
   tableName: 'bots',
@@ -24,20 +36,25 @@ const config = {
   integrations() {
     return this.hasMany('Integration')
   },
+
+  profile() {
+    return new Promise((res, rej) => {
+      const integrations = this.integrations()
+      const emails = this.emails()
+
+      Promise.all([integrations.fetch(), emails.fetch()])
+        .then(() => buildProfile(this, integrations, emails))
+        .then((bot) => res(bot))
+        .catch((err) => rej(err))
+    })
+  },
 }
 
 const virtuals = {
   profile(id) {
     return new this({ id: id })
-      .fetch({ required: true, withRelated: ['integrations', 'emails'] })
-      .then((bot) => assign(
-        {},
-        bot.toJSON(),
-        {
-          integrations: bot.related('integrations').pluck('type'),
-          emails: bot.related('emails').pluck('email'),
-        }
-      ))
+      .fetch({ required: true })
+      .then((bot) => bot.profile())
   },
 }
 

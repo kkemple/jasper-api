@@ -16,13 +16,15 @@ const getBots = (user) => {
   return user.bots().fetch()
 }
 const getBotProfiles = (bots) => {
-  return Promise.all(bots.map((bot) => Bot.profile(bot.get('id'))))
+  return Promise.all(bots.map((bot) => bot.profile()))
 }
 
 const deleteBot = (bot) => {
   return bot.integrations()
     .fetch()
     .then((integrations) => integrations.invokeThen('destroy'))
+    .then(() => bot.emails().fetch())
+    .then((emails) => emails.invokeThen('destroy'))
     .then(() => bot.destroy())
 }
 
@@ -53,7 +55,7 @@ export const allBotsHandler = (req, reply) => {
 
 export const botHandler = (req, reply) => {
   getBot(req.auth.credentials.user, req.params.botId)
-    .then((bot) => Bot.profile(bot.get('id')))
+    .then((bot) => bot.profile())
     .then((bot) => reply({
       success: true,
       payload: { bot },
@@ -121,7 +123,7 @@ export const createBotHandler = (req, reply) => {
 export const patchBotHandler = (req, reply) => {
   getBot(req.auth.credentials.user, req.params.botId)
     .then((bot) => patchBot(bot, req.payload))
-    .then((bot) => Bot.profile(bot.get('id')))
+    .then((bot) => bot.profile())
     .then((bot) => reply({
       success: true,
       payload: { bot },
@@ -139,7 +141,7 @@ export const patchBotHandler = (req, reply) => {
 export const putBotHandler = (req, reply) => {
   getBot(req.auth.credentials.user, req.params.botId)
     .then((bot) => putBot(bot, req.payload))
-    .then((bot) => Bot.profile(bot.get('id')))
+    .then((bot) => bot.profile())
     .then((bot) => reply({
       success: true,
       payload: { bot },

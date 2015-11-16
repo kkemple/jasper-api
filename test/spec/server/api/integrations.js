@@ -159,7 +159,7 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with a Bad Request', (done) => {
+          it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'POST',
               url: integrationsUrl,
