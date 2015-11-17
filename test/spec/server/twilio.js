@@ -2,6 +2,9 @@ import chai from 'chai'
 import nock from 'nock'
 
 import { getServer, loadPlugins } from '../../../server'
+import { User, Bot } from '../../../models'
+import { userConfig, botConfig } from '../../helpers/config'
+
 
 chai.should()
 
@@ -22,7 +25,11 @@ describe('Hapi Server', () => {
 
   describe('Twilio Plugin', () => {
     describe('POST /twilio/sms', () => {
-      beforeEach(() => {
+      let userModel
+      let botModel
+
+      beforeEach((done) => {
+
         nock('https://api.api.ai')
           .post('/v1/query')
           .reply(200, {
@@ -41,20 +48,45 @@ describe('Hapi Server', () => {
         nock('https://api.twilio.com/2010-04-01')
           .post(messagesUrl)
           .reply(200)
+
+        User.forge(userConfig({ password: 'test' }))
+          .save()
+          .then((user) => {
+            userModel = user
+
+            Bot.forge(botConfig({ user_id: userModel.get('id') }))
+              .save()
+              .then((bot) => {
+                botModel = bot
+                done()
+              })
+          })
+          .catch(done)
       })
 
-      it('should return with a valid response', (done) => {
-        server.inject({
-          method: 'POST',
-          url: '/twilio/sms',
-          payload: {
-            Body: '20% tip 66 dollars',
-            To: process.env.TO_PHONE_NUMBER,
-            From: process.env.FROM_PHONE_NUMBER,
-          },
-        }, (res) => {
-          res.payload.should.eq('ok')
-          done()
+      afterEach((done) => {
+        Bot.collection()
+          .fetch()
+          .then((bots) => bots.invokeThen('destroy'))
+          .then(() => userModel.destroy())
+          .then(() => done())
+          .catch(done)
+      })
+
+      describe('with a valid phone number', () => {
+        it('should return with a valid response', (done) => {
+          server.inject({
+            method: 'POST',
+            url: '/twilio/sms',
+            payload: {
+              Body: '20% tip 66 dollars',
+              To: '+15555555556',
+              From: botModel.get('phone_number'),
+            },
+          }, (res) => {
+            res.payload.should.eq('ok')
+            done()
+          })
         })
       })
     })

@@ -53,8 +53,12 @@ const config = {
 const virtuals = {
   profile(id) {
     return new this({ id: id })
-      .fetch({ required: true })
+      .fetch({ require: true })
       .then((bot) => bot.profile())
+  },
+
+  getByPhoneNumber(number) {
+    return new this({ phone_number: number }).fetch({ require: true })
   },
 }
 

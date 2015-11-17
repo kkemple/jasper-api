@@ -16,11 +16,11 @@ const getBotProfiles = (bots) => {
 }
 
 const deleteBot = (bot) => {
-  return bot.integrations()
-    .fetch()
-    .then((integrations) => integrations.invokeThen('destroy'))
-    .then(() => bot.emails().fetch())
-    .then((emails) => emails.invokeThen('destroy'))
+  const integrations = bot.integrations()
+  const emails = bot.emails()
+
+  return integrations.invokeThen('destroy')
+    .then(() => emails.invokeThen('destroy'))
     .then(() => bot.destroy())
 }
 

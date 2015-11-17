@@ -97,7 +97,7 @@ const virtuals = {
 
   profile(id, email) {
     return new this({ id: id, email: email })
-      .fetch({ required: true })
+      .fetch({ require: true })
       .then((user) => user.profile())
   },
 }

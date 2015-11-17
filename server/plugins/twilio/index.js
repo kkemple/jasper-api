@@ -1,5 +1,6 @@
 import twilioFactory from 'twilio'
 
+import { Bot } from '../../../models'
 import skynet from '../../../skynet'
 import logger from '../../../logger'
 
@@ -7,6 +8,9 @@ const twilio = twilioFactory(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
 )
+
+const unauthMessage = 'I\'m sorry, you are not authorized. ' +
+  'Sign up at https://skynet.releasable.io'
 
 const processSkynetResponse = (request, reply) => (response) => {
   const messageConfig = {
@@ -50,10 +54,23 @@ export const register = (server, options, next) => {
     path: '/twilio/sms',
     config: {
       auth: false,
-      handler(request, reply) {
-        skynet(request.payload.Body)
-          .then(processSkynetResponse(request, reply))
-          .catch((err) => logger.error(err))
+      handler(req, reply) {
+        const { From, To, Body } = req.payload
+
+        Bot.getByPhoneNumber(From)
+          .then(() => skynet(Body))
+          .then(processSkynetResponse(req, reply))
+          .catch((err) => {
+            if (typeof err === 'EmptyResponse') {
+              twilio.messages.create({
+                to: From,
+                from: To,
+                body: unauthMessage,
+              })
+            }
+
+            logger.error(err)
+          })
       },
     },
   })
