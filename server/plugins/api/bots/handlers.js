@@ -1,12 +1,7 @@
 import assign from 'lodash.assign'
-import twilioFactory from 'twilio'
+import provisionNumber from './twilio'
 
 import { Bot } from '../../../../models'
-
-const twilio = twilioFactory(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-)
 
 const getBot = (user, botId) => {
   return user.bots().fetchOne({ id: botId })
@@ -15,6 +10,7 @@ const getBot = (user, botId) => {
 const getBots = (user) => {
   return user.bots().fetch()
 }
+
 const getBotProfiles = (bots) => {
   return Promise.all(bots.map((bot) => bot.profile()))
 }
@@ -75,49 +71,28 @@ export const createBotHandler = (req, reply) => {
     user_id: req.auth.credentials.user.get('id'),
   })
 
-  twilio.availablePhoneNumbers('US')
-    .local
-    .list({ mmsEnabled: true }, (err, results) => {
-      if (err) {
-        reply({
-          success: false,
-          error: err.name,
-          message: err.message,
-          stack: err.stack,
-          timestamp: Date.now(),
-        })
-        return
-      }
-
-      twilio.incomingPhoneNumbers.create({
-        phoneNumber: results.availablePhoneNumbers[0].phoneNumber,
-        smsUrl: `https://${process.env.HOST}/twilio/sms`,
-      }, (err, number) => {
-        if (err) {
-          reply({
-            success: false,
-            error: err.name,
-            message: err.message,
-            stack: err.stack,
-            timestamp: Date.now(),
-          })
-          return
-        }
-
-        const botData = assign({}, data, {
-          phone_number: number.phoneNumber,
-        })
-
-        Bot.forge(botData)
-          .save()
-          .then((bot) => bot.fetch())
-          .then((bot) => reply({
-            success: true,
-            payload: { bot },
-            timestamp: Date.now(),
-          }))
+  provisionNumber()
+    .then((number) => {
+      const botData = assign({}, data, {
+        phone_number: number,
       })
+
+      Bot.forge(botData)
+        .save()
+        .then((bot) => bot.fetch())
+        .then((bot) => reply({
+          success: true,
+          payload: { bot },
+          timestamp: Date.now(),
+        }))
     })
+    .catch((err) => reply({
+      success: false,
+      error: err.name,
+      message: err.message,
+      stack: err.stack,
+      timestamp: Date.now(),
+    }))
 }
 
 export const patchBotHandler = (req, reply) => {
