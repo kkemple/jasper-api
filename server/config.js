@@ -17,6 +17,7 @@ export default [
   { register: require('./plugins/slack') },
   { register: require('./plugins/oauth') },
   { register: require('./plugins/logging') },
+  { register: require('./plugins/api/skynet') },
   { register: require('./plugins/api/users') },
   { register: require('./plugins/api/bots') },
   { register: require('./plugins/api/integrations') },
