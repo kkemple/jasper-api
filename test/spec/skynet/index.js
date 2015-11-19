@@ -10,6 +10,10 @@ const wolframSuccessResponse = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<queryresult success="false"></queryresult>'
 
 describe('Skynet', () => {
+  afterEach(() => {
+    nock.cleanAll()
+  })
+
   it('should be a function', () => {
     skynet.should.be.a('function')
   })
@@ -69,6 +73,7 @@ describe('Skynet', () => {
             speech: 'test',
             action: 'unknown.command',
             parameters: {},
+            resolvedQuery: 'this is my command',
           },
         })
 

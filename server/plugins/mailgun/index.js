@@ -3,8 +3,13 @@ import mg from 'nodemailer-mailgun-transport'
 import nodemailer from 'nodemailer'
 import request from 'superagent'
 
+import { Email } from '../../../models'
 import skynet from '../../../skynet'
 import logger from '../../../logger'
+
+const unauthMessage = 'I\'m sorry, you are not authorized. ' +
+  'Sign up at https://skynet.releasable.io'
+
 
 const auth = {
   auth: {
@@ -15,22 +20,34 @@ const auth = {
 
 const mailer = nodemailer.createTransport(mg(auth))
 
-const processSkynetResponse = (req, reply) => (response) => {
+const getCleanEmail = (dirtyEmail) => {
+  const matches = dirtyEmail.match(/\<(.*)\>/)
+  return matches[1]
+}
+
+const sendMail = (messageConfig) => {
+  mailer.sendMail(messageConfig, (err, info) => {
+    if (err) logger.error(err)
+    logger.info(info, 'mailgun response')
+  })
+}
+
+const processSkynetResponse = (payload, response) => new Promise((res, rej) => {
   const messageConfig = {
-    to: req.payload.From,
-    from: req.payload.To,
-    subject: `Skynet - ${req.payload['body-plain']}`,
+    to: payload.From,
+    from: payload.To,
+    subject: `Skynet - ${payload['body-plain']}`,
   }
 
   messageConfig.text = response.speech
 
   if (response.images) {
-    const attachmentPromises = map(response.images, (image) => new Promise((res, rej) => {
+    const attachmentPromises = map(response.images, (image) => new Promise((imageRes, imageRej) => {
       request
         .get(image)
         .end((err, imgResponse) => {
-          if (err) return rej(err)
-          res(imgResponse.body)
+          if (err) return imageRej(err)
+          imageRes(imgResponse.body)
         })
     }))
 
@@ -45,20 +62,13 @@ const processSkynetResponse = (req, reply) => (response) => {
 
         messageConfig.attachments = attachments
 
-        mailer.sendMail(messageConfig, (err, info) => {
-          if (err) logger.error(err)
-          logger.info(info, 'mailgun response')
-        })
+        res(messageConfig)
       })
+      .catch((err) => rej(err))
   } else {
-    mailer.sendMail(messageConfig, (err, info) => {
-      if (err) logger.error(err)
-      logger.info(info, 'mailgun response')
-    })
+    res(messageConfig)
   }
-
-  reply('ok')
-}
+})
 
 export const register = (server, options, next) => {
   server.route({
@@ -67,9 +77,26 @@ export const register = (server, options, next) => {
     config: {
       auth: false,
       handler(req, reply) {
-        skynet(req.payload['body-plain'])
-          .then(processSkynetResponse(req, reply))
-          .catch((err) => logger.error(err))
+        new Email({ email: getCleanEmail(req.payload.From) })
+          .fetch({ require: true })
+          .then(() => skynet(req.payload['body-plain']))
+          .then((response) => processSkynetResponse(req.payload, response))
+          .then((messageConfig) => sendMail(messageConfig))
+          .catch((err) => {
+            logger.error(err)
+            if (err.message === 'EmptyResponse') {
+              const messageConfig = {
+                to: req.payload.From,
+                from: req.payload.To,
+                subject: `Skynet - ${unauthMessage}`,
+                text: unauthMessage,
+              }
+
+              sendMail(messageConfig)
+            }
+          })
+
+        reply('ok')
       },
     },
   })

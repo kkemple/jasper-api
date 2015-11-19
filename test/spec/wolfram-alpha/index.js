@@ -11,6 +11,10 @@ const wolframResponse = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<queryresult success="false"></queryresult>'
 
 describe('Wolfram Alpha', () => {
+  afterEach(() => {
+    nock.cleanAll()
+  })
+
   it('should be a function', () => {
     wolframAlpha.should.be.a('function')
   })

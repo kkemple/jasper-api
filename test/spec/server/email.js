@@ -20,7 +20,7 @@ describe('Hapi Server', () => {
 
   describe('Email Plugin', () => {
     describe('POST /mailgun/email', () => {
-      beforeEach(() => {
+      before(() => {
         nock('https://api.api.ai')
           .post('/v1/query')
           .reply(200, {
@@ -41,14 +41,18 @@ describe('Hapi Server', () => {
           .reply(200, {})
       })
 
+      after(() => {
+        nock.cleanAll()
+      })
+
       it('should return with a valid response', (done) => {
         server.inject({
           method: 'POST',
           url: '/mailgun/email',
           payload: {
             Body: '20% tip 66 dollars',
-            To: 'test',
-            From: 'test',
+            To: 'test@releasable.io',
+            From: 'Test User <testuser@releasable.io>',
           },
         }, (res) => {
           res.payload.should.eq('ok')

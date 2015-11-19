@@ -41,6 +41,10 @@ describe('Hapi Server', () => {
           .reply(200, {})
       })
 
+      afterEach(() => {
+        nock.cleanAll()
+      })
+
       it('should return with a valid response', (done) => {
         server.inject({
           method: 'POST',

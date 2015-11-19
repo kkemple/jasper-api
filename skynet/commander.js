@@ -21,7 +21,6 @@ export default class Commander {
   execute(commands) {
     return new Promise((res, rej) => {
       const action = reduce(this.commandPath, reducer, commands)
-
       if (!action) {
         rej(new CommanderActionNotFoundError())
         return

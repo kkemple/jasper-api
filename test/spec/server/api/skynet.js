@@ -58,6 +58,7 @@ describe('Hapi Server', () => {
     })
 
     afterEach((done) => {
+      nock.cleanAll()
       botModel.destroy()
         .then(() => userModel.destroy())
         .then(() => done())

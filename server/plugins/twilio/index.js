@@ -61,7 +61,7 @@ export const register = (server, options, next) => {
           .then(() => skynet(Body))
           .then(processSkynetResponse(req, reply))
           .catch((err) => {
-            if (typeof err === 'EmptyResponse') {
+            if (err.message === 'EmptyResponse') {
               twilio.messages.create({
                 to: From,
                 from: To,

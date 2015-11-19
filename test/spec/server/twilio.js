@@ -29,7 +29,6 @@ describe('Hapi Server', () => {
       let botModel
 
       beforeEach((done) => {
-
         nock('https://api.api.ai')
           .post('/v1/query')
           .reply(200, {
@@ -65,6 +64,7 @@ describe('Hapi Server', () => {
       })
 
       afterEach((done) => {
+        nock.cleanAll()
         Bot.collection()
           .fetch()
           .then((bots) => bots.invokeThen('destroy'))
