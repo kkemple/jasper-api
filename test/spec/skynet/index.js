@@ -10,7 +10,7 @@ const wolframSuccessResponse = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<queryresult success="false"></queryresult>'
 
 describe('Skynet', () => {
-  afterEach(() => {
+  after(() => {
     nock.cleanAll()
   })
 
@@ -76,6 +76,11 @@ describe('Skynet', () => {
             resolvedQuery: 'this is my command',
           },
         })
+
+      nock('http://api.wolframalpha.com')
+        .get('/v2/query')
+        .query(true)
+        .reply(200, wolframSuccessResponse)
 
       skynet('hey there')
         .catch((err) => {

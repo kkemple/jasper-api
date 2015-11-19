@@ -23,10 +23,14 @@ const processCommand = (res, rej) => (responseErr, response) => {
     .catch((commanderErr) => rej(commanderErr))
 }
 
-export default (text) => new Promise((res, rej) => {
+export default (text, botId = '001') => new Promise((res, rej) => {
+  const apiAiData = { query: text, lang: 'en', sessionId: botId }
+
+  logger.info(apiAiData, 'api.ai request info')
+
   request
     .post(apiAiBaseUrl)
-    .send({ query: text, lang: 'en', sessionId: '001' })
+    .send(apiAiData)
     .set(apiAiHeaders)
     .end(processCommand(res, rej))
 })

@@ -13,10 +13,6 @@ export const authenticationPayload = {
   password: Joi.string().regex(/[a-zA-Z0-9@-_]{3,30}/).required(),
 }
 
-export const headers = Joi.object({
-  'x-access-token': Joi.string().required(),
-}).options({ allowUnknown: true })
-
 export const userPostPayload = {
   email: Joi.string().email().required(),
   password: Joi.string().regex(/[a-zA-Z0-9@-_]{3,30}/).required(),

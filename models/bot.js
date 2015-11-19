@@ -3,13 +3,14 @@ import Promise from 'bluebird'
 
 import orm from '../db'
 
-const buildProfile = (bot, integrations, emails) => {
+const buildProfile = (bot, integrations, emails, phoneNumbers) => {
   return assign(
     {},
     bot.toJSON(),
     {
       integrations: integrations.pluck('type'),
       emails: emails.pluck('email'),
+      phone_numbers: phoneNumbers.pluck('phone_number'),
     }
   )
 }
@@ -33,6 +34,11 @@ const config = {
     return this.hasMany('Email')
   },
 
+
+  phoneNumbers() {
+    return this.hasMany('PhoneNumber')
+  },
+
   integrations() {
     return this.hasMany('Integration')
   },
@@ -41,9 +47,10 @@ const config = {
     return new Promise((res, rej) => {
       const integrations = this.integrations()
       const emails = this.emails()
+      const phoneNumbers = this.phoneNumbers()
 
-      Promise.all([integrations.fetch(), emails.fetch()])
-        .then(() => buildProfile(this, integrations, emails))
+      Promise.all([integrations.fetch(), emails.fetch(), phoneNumbers.fetch()])
+        .then(() => buildProfile(this, integrations, emails, phoneNumbers))
         .then((bot) => res(bot))
         .catch((err) => rej(err))
     })

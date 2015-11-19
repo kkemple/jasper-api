@@ -79,7 +79,7 @@ export const register = (server, options, next) => {
       handler(req, reply) {
         new Email({ email: getCleanEmail(req.payload.From) })
           .fetch({ require: true })
-          .then(() => skynet(req.payload['body-plain']))
+          .then((email) => skynet(req.payload['body-plain'], email.get('bot_id')))
           .then((response) => processSkynetResponse(req.payload, response))
           .then((messageConfig) => sendMail(messageConfig))
           .catch((err) => {

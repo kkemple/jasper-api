@@ -50,6 +50,7 @@ export const botGetSuccessSchema = {
       updated_at: Joi.date().required(),
       integrations: Joi.array(),
       emails: Joi.array(),
+      phone_numbers: Joi.array(),
     }),
   }),
 }
@@ -70,6 +71,7 @@ export const botsGetSuccessSchema = {
         updated_at: Joi.date().required(),
         integrations: Joi.array(),
         emails: Joi.array(),
+        phone_numbers: Joi.array(),
       })
     ),
   }),

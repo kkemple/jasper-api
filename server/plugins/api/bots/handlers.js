@@ -18,9 +18,11 @@ const getBotProfiles = (bots) => {
 const deleteBot = (bot) => {
   const integrations = bot.integrations()
   const emails = bot.emails()
+  const phoneNumbers = bot.phoneNumbers()
 
   return integrations.invokeThen('destroy')
     .then(() => emails.invokeThen('destroy'))
+    .then(() => phoneNumbers.invokeThen('destroy'))
     .then(() => bot.destroy())
 }
 

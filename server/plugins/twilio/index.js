@@ -1,6 +1,6 @@
 import twilioFactory from 'twilio'
 
-import { Bot } from '../../../models'
+import { PhoneNumber } from '../../../models'
 import skynet from '../../../skynet'
 import logger from '../../../logger'
 
@@ -12,10 +12,10 @@ const twilio = twilioFactory(
 const unauthMessage = 'I\'m sorry, you are not authorized. ' +
   'Sign up at https://skynet.releasable.io'
 
-const processSkynetResponse = (request, reply) => (response) => {
+const processSkynetResponse = (payload, response) => new Promise((res, rej) => {
   const messageConfig = {
-    to: request.payload.From,
-    from: request.payload.To,
+    to: payload.From,
+    from: payload.To,
   }
 
   if (response.speech.length > 1600) {
@@ -29,24 +29,31 @@ const processSkynetResponse = (request, reply) => (response) => {
   twilio.messages.create(messageConfig, (err) => {
     if (err) {
       logger.error(err)
+      rej(err)
       return
     }
 
     if (response.speech.length > 1600) {
+      logger.info('twilio second MMS message')
       messageConfig.mediaUrl.length = 0
       messageConfig.body = `...${response.speech.substring(1597)}`
 
       twilio.messages.create(messageConfig, (err2) => {
         if (err2) {
           logger.error(err2)
+          rej(err2)
           return
         }
+
+        logger.info(messageConfig, 'twilio second payload')
+        res()
       })
+    } else {
+      logger.info(messageConfig, 'twilio payload')
+      res()
     }
   })
-
-  reply('ok')
-}
+})
 
 export const register = (server, options, next) => {
   server.route({
@@ -57,9 +64,10 @@ export const register = (server, options, next) => {
       handler(req, reply) {
         const { From, To, Body } = req.payload
 
-        Bot.getByPhoneNumber(From)
-          .then(() => skynet(Body))
-          .then(processSkynetResponse(req, reply))
+        new PhoneNumber({ phone_number: From })
+          .fetch({ require: true })
+          .then((phoneNumber) => skynet(Body, phoneNumber.get('bot_id')))
+          .then((response) => processSkynetResponse(req.payload, response))
           .catch((err) => {
             if (err.message === 'EmptyResponse') {
               twilio.messages.create({
@@ -67,10 +75,18 @@ export const register = (server, options, next) => {
                 from: To,
                 body: unauthMessage,
               })
+            } else {
+              twilio.messages.create({
+                to: From,
+                from: To,
+                body: 'How embarrassing! Looks like something went wrong!',
+              })
             }
 
             logger.error(err)
           })
+
+        reply('ok')
       },
     },
   })

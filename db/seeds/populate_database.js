@@ -34,6 +34,15 @@ exports.seed = function(knex, Promise) {
       })
     })
     .then(function() {
+      return knex('phone_numbers').insert({
+        id: 1,
+        bot_id: 1,
+        phone_number: '+15555555556',
+        created_at: timestamp,
+        updated_at: timestamp,
+      })
+    })
+    .then(function() {
       return knex('integrations').insert({
         id: 1,
         bot_id: 1,
