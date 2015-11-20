@@ -1,4 +1,7 @@
 import Joi from 'joi'
+import phone from 'joi-phone'
+
+Joi.phone = phone
 
 export const userValidation = {
   email: Joi.string().email().required(),
@@ -49,4 +52,13 @@ export const emailPostPayload = {
 export const emailParams = {
   botId: Joi.number().required(),
   emailId: Joi.number().required(),
+}
+
+export const phoneNumberPostPayload = {
+  phone_number: Joi.phone.e164().required(),
+}
+
+export const phoneNumberParams = {
+  botId: Joi.number().required(),
+  phoneNumberId: Joi.number().required(),
 }

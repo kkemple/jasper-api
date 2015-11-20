@@ -1,4 +1,7 @@
 import Joi from 'joi'
+import phone from 'joi-phone'
+
+Joi.phone = phone
 
 export const authSuccessSchema = {
   success: Joi.boolean().invalid(false).required(),
@@ -25,7 +28,7 @@ export const userGetSuccessSchema = {
           user_id: Joi.number().required(),
           active: Joi.boolean().required(),
           name: Joi.string().required(),
-          phone_number: Joi.string().required(),
+          phone_number: Joi.phone.e164().required(),
           extra_data: Joi.string().allow(null).allow(''),
           created_at: Joi.date().required(),
           updated_at: Joi.date().required(),
@@ -44,7 +47,7 @@ export const botGetSuccessSchema = {
       user_id: Joi.number().required(),
       active: Joi.boolean().required(),
       name: Joi.string().required(),
-      phone_number: Joi.string().required(),
+      phone_number: Joi.phone.e164().required(),
       extra_data: Joi.string().allow(null).allow(''),
       created_at: Joi.date().required(),
       updated_at: Joi.date().required(),
@@ -65,7 +68,7 @@ export const botsGetSuccessSchema = {
         user_id: Joi.number().required(),
         active: Joi.boolean().required(),
         name: Joi.string().required(),
-        phone_number: Joi.string().required(),
+        phone_number: Joi.phone.e164().required(),
         extra_data: Joi.string().allow(null).allow(''),
         created_at: Joi.date().required(),
         updated_at: Joi.date().required(),
@@ -142,6 +145,40 @@ export const emailsGetSuccessSchema = {
         id: Joi.number().required(),
         bot_id: Joi.number().required(),
         email: Joi.string().email().required(),
+        active: Joi.boolean().required(),
+        extra_data: Joi.string().allow(null).allow(''),
+        created_at: Joi.date().required(),
+        updated_at: Joi.date().required(),
+      })
+    ),
+  }),
+}
+
+export const phoneNumberGetSuccessSchema = {
+  success: Joi.boolean().invalid(false).required(),
+  timestamp: Joi.date().required(),
+  payload: Joi.object().keys({
+    phone_number: Joi.object().keys({
+      id: Joi.number().required(),
+      bot_id: Joi.number().required(),
+      phone_number: Joi.phone.e164().required(),
+      active: Joi.boolean().required(),
+      extra_data: Joi.string().allow(null).allow(''),
+      created_at: Joi.date().required(),
+      updated_at: Joi.date().required(),
+    }),
+  }),
+}
+
+export const phoneNumbersGetSuccessSchema = {
+  success: Joi.boolean().invalid(false).required(),
+  timestamp: Joi.date().required(),
+  payload: Joi.object().keys({
+    phone_numbers: Joi.array().items(
+      Joi.object().keys({
+        id: Joi.number().required(),
+        bot_id: Joi.number().required(),
+        phone_number: Joi.phone.e164().required(),
         active: Joi.boolean().required(),
         extra_data: Joi.string().allow(null).allow(''),
         created_at: Joi.date().required(),

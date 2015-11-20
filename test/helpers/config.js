@@ -31,3 +31,10 @@ export const emailConfig = (props = {}) => {
     email: 'skynet@releasable.io',
   }, props)
 }
+
+export const phoneNumberConfig = (props = {}) => {
+  return assign({}, {
+    bot_id: 1,
+    phone_number: '+15555555555',
+  }, props)
+}

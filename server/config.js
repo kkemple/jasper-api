@@ -22,4 +22,5 @@ export default [
   { register: require('./plugins/api/bots') },
   { register: require('./plugins/api/integrations') },
   { register: require('./plugins/api/emails') },
+  { register: require('./plugins/api/phone-numbers') },
 ]
