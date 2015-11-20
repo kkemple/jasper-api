@@ -15,8 +15,8 @@ export default () => new Promise((res, rej) => {
       twilio.incomingPhoneNumbers.create({
         phoneNumber: results.availablePhoneNumbers[0].phoneNumber,
         smsUrl: `https://${process.env.HOST}/twilio/sms`,
-      }, (err, number) => {
-        if (err) return rej(err)
+      }, (createErr, number) => {
+        if (createErr) return rej(createErr)
         res(number.phoneNumber)
       })
     })
