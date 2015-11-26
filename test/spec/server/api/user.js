@@ -210,6 +210,7 @@ describe('Hapi Server', () => {
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
+
               payload.success.should.eq(true)
               done()
             })

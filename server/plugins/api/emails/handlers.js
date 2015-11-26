@@ -139,7 +139,7 @@ export const deleteEmailHandler = (req, reply) => {
 
   getBot(req.auth.credentials.user, botId)
     .then((bot) => getEmail(bot, emailId))
-    .then((email) => email.destroy())
+    .then((email) => email.archive())
     .then(() => reply({
       success: true,
       timestamp: Date.now(),

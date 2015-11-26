@@ -15,7 +15,7 @@ const getBotProfiles = (bots) => {
 }
 
 const deleteBot = (bot) => {
-  return bot.destroy()
+  return bot.archive()
 }
 
 const patchBot = (bot, payload) => {

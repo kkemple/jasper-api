@@ -19,7 +19,11 @@ const config = {
   },
 
   user() {
-    return this.belongsTo('User')
+    return this.belongsTo('User').query({ where: { active: true } })
+  },
+
+  archive() {
+    return this.save({ active: false }, { patch: true })
   },
 }
 

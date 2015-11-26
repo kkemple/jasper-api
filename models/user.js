@@ -22,6 +22,21 @@ const destroyDependencies = (model) => {
   ]))
 }
 
+const archiveDependencies = (model) => {
+  const bots = model.bots()
+  const tokens = model.tokens()
+
+
+  return Promise.all([
+    bots.fetch(),
+    tokens.fetch(),
+  ])
+  .then(() => Promise.all([
+    bots.invokeThen('archive'),
+    tokens.invokeThen('archive'),
+  ]))
+}
+
 const validate = (model, attrs) => {
   return Joi.validate(attrs, userValidation)
 }
@@ -107,6 +122,11 @@ const config = {
         .then((bots) => res(buildProfile(this, bots)))
         .catch((err) => rej(err))
     })
+  },
+
+  archive() {
+    return archiveDependencies(this)
+      .then(() => this.save({ active: false }, { patch: true }))
   },
 }
 

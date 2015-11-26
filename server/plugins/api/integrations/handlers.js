@@ -141,7 +141,7 @@ export const deleteIntegrationHandler = (req, reply) => {
 
   getBot(req.auth.credentials.user, botId)
     .then((bot) => getIntegration(bot, integrationId))
-    .then((integration) => integration.destroy())
+    .then((integration) => integration.archive())
     .then(() => reply({
       success: true,
       timestamp: Date.now(),

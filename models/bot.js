@@ -20,6 +20,23 @@ const destroyDependencies = (model) => {
   ]))
 }
 
+const archiveDependencies = (model) => {
+  const emails = model.emails()
+  const phoneNumbers = model.phoneNumbers()
+  const integrations = model.integrations()
+
+  return Promise.all([
+    emails.fetch(),
+    phoneNumbers.fetch(),
+    integrations.fetch(),
+  ])
+  .then(() => Promise.all([
+    emails.invokeThen('archive'),
+    phoneNumbers.invokeThen('archive'),
+    integrations.invokeThen('archive'),
+  ]))
+}
+
 const buildProfile = (bot, integrations, emails, phoneNumbers) => {
   return assign({}, bot.toJSON(), {
     integrations: integrations.pluck('type'),
@@ -67,6 +84,11 @@ const config = {
         .then((bot) => res(bot))
         .catch((err) => rej(err))
     })
+  },
+
+  archive() {
+    return archiveDependencies(this)
+      .then(() => this.save({ active: false }, { patch: true }))
   },
 }
 

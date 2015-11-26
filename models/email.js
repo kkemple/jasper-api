@@ -14,6 +14,10 @@ const config = {
   bot() {
     return this.belongsTo('Bot')
   },
+
+  archive() {
+    return this.save({ active: false }, { patch: true })
+  },
 }
 
 const virtuals = {

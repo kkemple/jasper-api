@@ -22,7 +22,7 @@ const jwt = (decoded, request, callback) => {
   new Token({ uuid: decoded.uuid })
     .fetch({ require: true })
     .then((token) => validateToken(token))
-    .then((token) => token.user().fetch())
+    .then((token) => token.user().fetch({ require: true }))
     .then((user) => callback(null, true, { user: user, authType: 'jwt' }))
     .catch((err) => callback(err, false))
 }

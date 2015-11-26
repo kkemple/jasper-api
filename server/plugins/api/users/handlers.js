@@ -2,7 +2,7 @@ import tokenize from '../../../../services/tokenize'
 import { User } from '../../../../models'
 
 const deleteUser = (user) => {
-  return user.destroy()
+  return user.archive()
 }
 
 const patchUser = (user, payload) => {

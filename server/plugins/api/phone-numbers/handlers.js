@@ -139,7 +139,7 @@ export const deletePhoneNumberHandler = (req, reply) => {
 
   getBot(req.auth.credentials.user, botId)
     .then((bot) => getPhoneNumber(bot, phoneNumberId))
-    .then((phoneNumber) => phoneNumber.destroy())
+    .then((phoneNumber) => phoneNumber.archive())
     .then(() => reply({
       success: true,
       timestamp: Date.now(),
