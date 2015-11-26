@@ -10,7 +10,6 @@ import logger from '../../../logger'
 const unauthMessage = 'I\'m sorry, you are not authorized. ' +
   'Sign up at https://skynet.releasable.io'
 
-
 const auth = {
   auth: {
     api_key: process.env.MAILGUN_API_KEY,

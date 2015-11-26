@@ -1,7 +1,7 @@
 import chai from 'chai'
 import Joi from 'joi'
-import nock from 'nock'
 
+import tokenize from '../../../../services/tokenize'
 import {
   botGetSuccessSchema,
   botsGetSuccessSchema,
@@ -12,20 +12,6 @@ import { userConfig, botConfig } from '../../../helpers/config'
 import { getServer, loadPlugins } from '../../../../server'
 
 chai.should()
-
-const twilioId = process.env.TWILIO_ACCOUNT_SID
-const listNumbersUrl = `/Accounts/${twilioId}/AvailablePhoneNumbers/US/Local.json`
-const createNumberUrl = `/Accounts/${twilioId}/IncomingPhoneNumbers.json`
-
-const numbers = {
-  availablePhoneNumbers: [
-    { phoneNumber: '+15555555555' },
-  ],
-}
-
-const number = {
-  phoneNumber: '+15555555555',
-}
 
 describe('Hapi Server', () => {
   let server
@@ -42,6 +28,7 @@ describe('Hapi Server', () => {
     let botModel
     let botUrl
     let botsUrl
+    let token
 
     before((done) => {
       User.forge(userConfig({ password: 'test' }))
@@ -55,7 +42,10 @@ describe('Hapi Server', () => {
               botModel = bot
               botUrl = `/api/bots/${botModel.get('id')}`
               botsUrl = `/api/bots`
-              done()
+
+              tokenize(userModel)
+                .then((userToken) => token = userToken)
+                .then(() => done())
             })
         })
         .catch(done)
@@ -78,7 +68,7 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: botsUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -113,7 +103,7 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: botUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -143,17 +133,6 @@ describe('Hapi Server', () => {
 
       describe('POST /api/bots', () => {
         describe('with a valid token', () => {
-          beforeEach(() => {
-            nock('https://api.twilio.com/2010-04-01')
-              .get(listNumbersUrl)
-              .query(true)
-              .reply(200, numbers)
-
-            nock('https://api.twilio.com/2010-04-01')
-              .post(createNumberUrl)
-              .reply(200, number)
-          })
-
           it('should return newly created bot', (done) => {
             server.inject({
               method: 'POST',
@@ -162,7 +141,7 @@ describe('Hapi Server', () => {
                 name: 'test-bot',
               },
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -200,7 +179,7 @@ describe('Hapi Server', () => {
               method: 'PATCH',
               url: botUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
               payload: {
                 name: 'test-bot-3',
@@ -239,7 +218,7 @@ describe('Hapi Server', () => {
               method: 'PUT',
               url: botUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
               payload: {
                 name: 'test-bot-3',
@@ -278,7 +257,7 @@ describe('Hapi Server', () => {
               method: 'DELETE',
               url: botUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)

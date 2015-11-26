@@ -1,5 +1,4 @@
 import assign from 'lodash.assign'
-import provisionNumber from './twilio'
 
 import { Bot } from '../../../../models'
 
@@ -16,14 +15,7 @@ const getBotProfiles = (bots) => {
 }
 
 const deleteBot = (bot) => {
-  const integrations = bot.integrations()
-  const emails = bot.emails()
-  const phoneNumbers = bot.phoneNumbers()
-
-  return integrations.invokeThen('destroy')
-    .then(() => emails.invokeThen('destroy'))
-    .then(() => phoneNumbers.invokeThen('destroy'))
-    .then(() => bot.destroy())
+  return bot.destroy()
 }
 
 const patchBot = (bot, payload) => {
@@ -73,21 +65,14 @@ export const createBotHandler = (req, reply) => {
     user_id: req.auth.credentials.user.get('id'),
   })
 
-  provisionNumber()
-    .then((number) => {
-      const botData = assign({}, data, {
-        phone_number: number,
-      })
-
-      Bot.forge(botData)
-        .save()
-        .then((bot) => bot.fetch())
-        .then((bot) => reply({
-          success: true,
-          payload: { bot },
-          timestamp: Date.now(),
-        }))
-    })
+  Bot.forge(data)
+    .save()
+    .then((bot) => bot.fetch())
+    .then((bot) => reply({
+      success: true,
+      payload: { bot },
+      timestamp: Date.now(),
+    }))
     .catch((err) => reply({
       success: false,
       error: err.name,

@@ -11,7 +11,6 @@ export const botConfig = (props = {}) => {
   return assign({}, {
     user_id: 1,
     name: 'test-bot',
-    phone_number: '+15555555555',
   }, props)
 }
 

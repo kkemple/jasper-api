@@ -1,6 +1,7 @@
 import chai from 'chai'
 import Joi from 'joi'
 
+import tokenize from '../../../../services/tokenize'
 import {
   integrationGetSuccessSchema,
   integrationsGetSuccessSchema,
@@ -27,6 +28,7 @@ describe('Hapi Server', () => {
     let botModel
     let integrationUrl
     let integrationsUrl
+    let token
 
     beforeEach((done) => {
       User.forge(userConfig({ password: 'test' }))
@@ -44,7 +46,10 @@ describe('Hapi Server', () => {
                 .then((integration) => {
                   integrationUrl = `/api/bots/${botModel.get('id')}/integrations/${integration.get('id')}`
                   integrationsUrl = `/api/bots/${botModel.get('id')}/integrations`
-                  done()
+
+                  tokenize(user)
+                    .then((userToken) => token = userToken)
+                    .then(() => done())
                 })
             })
         })
@@ -69,7 +74,7 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: integrationsUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -104,7 +109,7 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: integrationUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -145,7 +150,7 @@ describe('Hapi Server', () => {
                 expires_in: 1000,
               },
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -180,7 +185,7 @@ describe('Hapi Server', () => {
               method: 'PATCH',
               url: integrationUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
               payload: {
                 type: 'test-3',
@@ -220,7 +225,7 @@ describe('Hapi Server', () => {
               method: 'PUT',
               url: integrationUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
               payload: {
                 type: 'test-3',
@@ -261,7 +266,7 @@ describe('Hapi Server', () => {
               method: 'DELETE',
               url: integrationUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)

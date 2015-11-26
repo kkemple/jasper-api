@@ -1,6 +1,7 @@
 import chai from 'chai'
 import nock from 'nock'
 
+import tokenize from '../../../../services/tokenize'
 import { getServer, loadPlugins } from '../../../../server'
 import { User, Bot } from '../../../../models'
 import { userConfig, botConfig } from '../../../helpers/config'
@@ -24,6 +25,7 @@ describe('Hapi Server', () => {
   describe('Skynet Plugin', () => {
     let userModel
     let botModel
+    let token
 
     beforeEach((done) => {
       nock('https://api.api.ai')
@@ -51,7 +53,9 @@ describe('Hapi Server', () => {
             .then((bot) => {
               botModel = bot
 
-              done()
+              tokenize(user)
+                .then((userToken) => token = userToken)
+                .then(() => done())
             })
         })
         .catch(done)
@@ -71,7 +75,7 @@ describe('Hapi Server', () => {
           method: 'POST',
           url: `/api/bots/${botModel.get('id')}/skynet`,
           headers: {
-            authorization: `Bearer ${userModel.token()}`,
+            authorization: `Bearer ${token}`,
           },
           payload: {
             query: '20% tip 66 dollars',
@@ -91,7 +95,7 @@ describe('Hapi Server', () => {
           method: 'GET',
           url: `/api/bots/${botModel.get('id')}/skynet?q=20% tip 66 dollars`,
           headers: {
-            authorization: `Bearer ${userModel.token()}`,
+            authorization: `Bearer ${token}`,
           },
         }, (res) => {
           const payload = JSON.parse(res.payload)
