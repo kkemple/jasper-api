@@ -1,3 +1,4 @@
+import tokenize from '../../../../services/tokenize'
 import { User } from '../../../../models'
 import {
   authenticationPayload,
@@ -28,28 +29,16 @@ export const register = (server, options, next) => {
           payload: authenticationPayload,
         },
         handler(req, reply) {
-          User.authenticate(req.payload.email, req.payload.password)
-            .then((user) => {
-              const token = user.token()
+          const { email, password } = req.payload
 
-              const response = {
+          User.authenticate(email, password)
+            .then((user) => tokenize(user))
+            .then((token) => {
+              reply({
                 success: true,
                 payload: { token },
                 timestamp: Date.now(),
-              }
-
-              const cookieOptions = {
-                ttl: 365 * 24 * 60 * 60 * 1000, // expires a year from today
-                encoding: 'none',    // we already used JWT to encode
-                isSecure: true,      // warm & fuzzy feelings
-                isHttpOnly: true,    // prevent client alteration
-                clearInvalid: false, // remove invalid cookies
-                strictHeader: true,  // don't allow violations of RFC 6265
-              }
-
-              reply(response)
-                .header('Authorization', token)
-                .state('token', token, cookieOptions)
+              })
             })
             .catch((err) => reply({
               success: false,

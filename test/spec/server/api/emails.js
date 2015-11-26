@@ -1,6 +1,7 @@
 import chai from 'chai'
 import Joi from 'joi'
 
+import tokenize from '../../../../services/tokenize'
 import {
   emailGetSuccessSchema,
   emailsGetSuccessSchema,
@@ -27,6 +28,7 @@ describe('Hapi Server', () => {
     let botModel
     let emailUrl
     let emailsUrl
+    let token
 
     beforeEach((done) => {
       User.forge(userConfig({ password: 'test' }))
@@ -44,7 +46,10 @@ describe('Hapi Server', () => {
                 .then((email) => {
                   emailUrl = `/api/bots/${botModel.get('id')}/emails/${email.get('id')}`
                   emailsUrl = `/api/bots/${botModel.get('id')}/emails`
-                  done()
+
+                  tokenize(user)
+                    .then((userToken) => token = userToken)
+                    .then(() => done())
                 })
             })
         })
@@ -69,7 +74,7 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: emailsUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -104,7 +109,7 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: emailUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -142,7 +147,7 @@ describe('Hapi Server', () => {
                 email: 'test@releasable.io',
               },
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -177,7 +182,7 @@ describe('Hapi Server', () => {
               method: 'PATCH',
               url: emailUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
               payload: {
                 email: 'test@releasable.io',
@@ -217,7 +222,7 @@ describe('Hapi Server', () => {
               method: 'PUT',
               url: emailUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
               payload: {
                 email: 'test@releasable.io',
@@ -256,7 +261,7 @@ describe('Hapi Server', () => {
               method: 'DELETE',
               url: emailUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)

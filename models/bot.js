@@ -3,6 +3,23 @@ import Promise from 'bluebird'
 
 import orm from '../db'
 
+const destroyDependencies = (model) => {
+  const emails = model.emails()
+  const phoneNumbers = model.phoneNumbers()
+  const integrations = model.integrations()
+
+  return Promise.all([
+    emails.fetch(),
+    phoneNumbers.fetch(),
+    integrations.fetch(),
+  ])
+  .then(() => Promise.all([
+    emails.invokeThen('destroy'),
+    phoneNumbers.invokeThen('destroy'),
+    integrations.invokeThen('destroy'),
+  ]))
+}
+
 const buildProfile = (bot, integrations, emails, phoneNumbers) => {
   return assign(
     {},
@@ -21,6 +38,7 @@ const config = {
   hasTimestamps: true,
 
   initialize() {
+    this.on('destroying', destroyDependencies)
     this.on('saving', this.validate)
   },
 
@@ -33,7 +51,6 @@ const config = {
   emails() {
     return this.hasMany('Email')
   },
-
 
   phoneNumbers() {
     return this.hasMany('PhoneNumber')
@@ -62,10 +79,6 @@ const virtuals = {
     return new this({ id: id })
       .fetch({ require: true })
       .then((bot) => bot.profile())
-  },
-
-  getByPhoneNumber(number) {
-    return new this({ phone_number: number }).fetch({ require: true })
   },
 }
 

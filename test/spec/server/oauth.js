@@ -1,6 +1,7 @@
 import chai from 'chai'
 import nock from 'nock'
 
+import tokenize from '../../../services/tokenize'
 import { User, Bot } from '../../../models'
 import { userConfig, botConfig } from '../../helpers/config'
 
@@ -22,6 +23,7 @@ describe('Hapi Server', () => {
     describe('POST /oauth/spotify', () => {
       let userModel
       let botModel
+      let token
 
       const data = {
         access_token: 'access_token',
@@ -42,7 +44,10 @@ describe('Hapi Server', () => {
               .save()
               .then((savedBot) => {
                 botModel = savedBot
-                done()
+
+                tokenize(userModel)
+                  .then((userToken) => token = userToken)
+                  .then(() => done())
               })
           })
           .catch(done)
@@ -68,7 +73,7 @@ describe('Hapi Server', () => {
             bot_id: botModel.get('id'),
           },
           headers: {
-            authorization: `Bearer ${userModel.token()}`,
+            authorization: `Bearer ${token}`,
           },
         }, (res) => {
           const payload = JSON.parse(res.payload)

@@ -1,6 +1,7 @@
 import chai from 'chai'
 import Joi from 'joi'
 
+import tokenize from '../../../../services/tokenize'
 import {
   phoneNumberGetSuccessSchema,
   phoneNumbersGetSuccessSchema,
@@ -27,6 +28,7 @@ describe('Hapi Server', () => {
     let botModel
     let phoneNumberUrl
     let phoneNumbersUrl
+    let token
 
     beforeEach((done) => {
       User.forge(userConfig({ password: 'test' }))
@@ -44,7 +46,10 @@ describe('Hapi Server', () => {
                 .then((phoneNumber) => {
                   phoneNumberUrl = `/api/bots/${botModel.get('id')}/phonenumbers/${phoneNumber.get('id')}`
                   phoneNumbersUrl = `/api/bots/${botModel.get('id')}/phonenumbers`
-                  done()
+
+                  tokenize(user)
+                    .then((userToken) => token = userToken)
+                    .then(() => done())
                 })
             })
         })
@@ -69,7 +74,7 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: phoneNumbersUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -104,7 +109,7 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: phoneNumberUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -142,7 +147,7 @@ describe('Hapi Server', () => {
                 phone_number: '+15555555555',
               },
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -177,7 +182,7 @@ describe('Hapi Server', () => {
               method: 'PATCH',
               url: phoneNumberUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
               payload: {
                 phone_number: '+15555555556',
@@ -217,7 +222,7 @@ describe('Hapi Server', () => {
               method: 'PUT',
               url: phoneNumberUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
               payload: {
                 phone_number: '+15555555556',
@@ -256,7 +261,7 @@ describe('Hapi Server', () => {
               method: 'DELETE',
               url: phoneNumberUrl,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)

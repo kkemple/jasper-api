@@ -1,6 +1,7 @@
 import chai from 'chai'
 import Joi from 'joi'
 
+import tokenize from '../../../../services/tokenize'
 import { authSuccessSchema, userGetSuccessSchema } from '../../../validations'
 import { User } from '../../../../models'
 import { userConfig } from '../../../helpers/config'
@@ -26,10 +27,13 @@ describe('Hapi Server', () => {
 
   describe('Api Plugin', () => {
     let userModel
+    let token
 
     beforeEach((done) => {
       createUser()
         .then((user) => userModel = user)
+        .then((user) => tokenize(user))
+        .then((userToken) => token = userToken)
         .then(() => done())
         .catch(done)
     })
@@ -88,7 +92,7 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: `/api/users/${userModel.get('id')}`,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -123,7 +127,7 @@ describe('Hapi Server', () => {
               method: 'PATCH',
               url: `/api/users/${userModel.get('id')}`,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
               payload: {
                 email: 'test@releasable.io',
@@ -162,7 +166,7 @@ describe('Hapi Server', () => {
               method: 'PUT',
               url: `/api/users/${userModel.get('id')}`,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
               payload: {
                 email: 'test@releasable.io',
@@ -202,7 +206,7 @@ describe('Hapi Server', () => {
               method: 'DELETE',
               url: `/api/users/${userModel.get('id')}`,
               headers: {
-                authorization: `Bearer ${userModel.token()}`,
+                authorization: `Bearer ${token}`,
               },
             }, (res) => {
               const payload = JSON.parse(res.payload)
