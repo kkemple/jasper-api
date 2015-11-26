@@ -21,15 +21,11 @@ const destroyDependencies = (model) => {
 }
 
 const buildProfile = (bot, integrations, emails, phoneNumbers) => {
-  return assign(
-    {},
-    bot.toJSON(),
-    {
-      integrations: integrations.pluck('type'),
-      emails: emails.pluck('email'),
-      phone_numbers: phoneNumbers.pluck('phone_number'),
-    }
-  )
+  return assign({}, bot.toJSON(), {
+    integrations: integrations.pluck('type'),
+    emails: emails.pluck('email'),
+    phone_numbers: phoneNumbers.pluck('phone_number'),
+  })
 }
 
 const config = {

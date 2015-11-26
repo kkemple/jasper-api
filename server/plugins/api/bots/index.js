@@ -1,5 +1,3 @@
-import Joi from 'joi'
-
 import {
   allBotsHandler,
   botHandler,
@@ -19,14 +17,7 @@ export const register = (server, options, next) => {
     {
       method: 'GET',
       path: '/api/bots',
-      config: {
-        validate: {
-          params: {
-            userId: Joi.number(),
-          },
-        },
-        handler: allBotsHandler,
-      },
+      handler: allBotsHandler,
     },
     {
       method: 'GET',
