@@ -27,8 +27,8 @@ export const register = (server, options, next) => {
           }
 
           request(mailchimpUrl)
-            .auth('user', process.env.MAILCHIMP_API_KEY)
             .post(betaListUrl)
+            .auth('user', process.env.MAILCHIMP_API_KEY)
             .send(data)
             .end((err, response) => {
               if (err) {
