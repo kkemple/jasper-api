@@ -16,18 +16,17 @@ export const register = (server, options, next) => {
       config: {
         auth: false,
         validate: {
-          params: { email: Joi.string().email().required() },
+          payload: { email: Joi.string().email().required() },
         },
         handler(req, reply) {
-          const { email } = req.params
+          const { email } = req.payload
 
           const data = {
             email_address: email,
             status: 'subscribed',
           }
 
-          request(mailchimpUrl)
-            .post(betaListUrl)
+          request.post(`${mailchimpUrl}${betaListUrl}`)
             .auth('user', process.env.MAILCHIMP_API_KEY)
             .send(data)
             .end((err, response) => {
@@ -55,6 +54,6 @@ export const register = (server, options, next) => {
 }
 
 register.attributes = {
-  name: 'subcribers',
+  name: 'subscribers',
   version: '1.0.0',
 }
