@@ -85,12 +85,12 @@ describe('Hapi Server', () => {
     })
 
     describe('User Endpoint', () => {
-      describe('GET /api/users/{id}', () => {
+      describe('GET /api/users/current', () => {
         describe('with a valid token', () => {
           it('should return a valid response', (done) => {
             server.inject({
               method: 'GET',
-              url: `/api/users/${userModel.get('id')}`,
+              url: '/api/users/current',
               headers: {
                 authorization: `Bearer ${token}`,
               },
@@ -106,10 +106,10 @@ describe('Hapi Server', () => {
         })
 
         describe('with an invalid token', () => {
-          it('should return with Unauthorized Error', (done) => {
+          it('should return with Not Found Error', (done) => {
             server.inject({
               method: 'GET',
-              url: `/api/users/${userModel.get('id')}`,
+              url: '/api/users/current',
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -147,7 +147,7 @@ describe('Hapi Server', () => {
         describe('with an invalid token', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
-              method: 'GET',
+              method: 'PATCH',
               url: `/api/users/${userModel.get('id')}`,
             }, (res) => {
               const payload = JSON.parse(res.payload)
@@ -187,7 +187,7 @@ describe('Hapi Server', () => {
         describe('with an invalid token', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
-              method: 'GET',
+              method: 'PUT',
               url: `/api/users/${userModel.get('id')}`,
             }, (res) => {
               const payload = JSON.parse(res.payload)

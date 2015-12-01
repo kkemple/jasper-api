@@ -30,9 +30,6 @@ export const register = (server, options, next) => {
       method: 'GET',
       path: '/api/users/current',
       config: {
-        validate: {
-          params: userParams,
-        },
         handler: getUserHandler,
       },
     },
