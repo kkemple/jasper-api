@@ -12,7 +12,6 @@ import {
   authenticationPayload,
   passwordResetPayload,
   userPostPayload,
-  userParams,
 } from '../../../../validations'
 
 export const register = (server, options, next) => {
@@ -58,33 +57,18 @@ export const register = (server, options, next) => {
     },
     {
       method: 'PATCH',
-      path: '/api/users/{id}',
-      config: {
-        validate: {
-          params: userParams,
-        },
-        handler: patchUserHandler,
-      },
+      path: '/api/users/current',
+      handler: patchUserHandler,
     },
     {
       method: 'PUT',
-      path: '/api/users/{id}',
-      config: {
-        validate: {
-          params: userParams,
-        },
-        handler: putUserHandler,
-      },
+      path: '/api/users/current',
+      handler: putUserHandler,
     },
     {
       method: 'DELETE',
-      path: '/api/users/{id}',
-      config: {
-        validate: {
-          params: userParams,
-        },
-        handler: deleteUserHandler,
-      },
+      path: '/api/users/current',
+      handler: deleteUserHandler,
     },
   ])
 

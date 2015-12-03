@@ -165,12 +165,12 @@ describe('Hapi Server', () => {
         })
       })
 
-      describe('PATCH /api/users/{id}', () => {
+      describe('PATCH /api/users/current', () => {
         describe('with a valid token', () => {
           it('should return an updated user', (done) => {
             server.inject({
               method: 'PATCH',
-              url: `/api/users/${userModel.get('id')}`,
+              url: `/api/users/current`,
               headers: {
                 authorization: `Bearer ${token}`,
               },
@@ -193,7 +193,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PATCH',
-              url: `/api/users/${userModel.get('id')}`,
+              url: `/api/users/current`,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -204,12 +204,12 @@ describe('Hapi Server', () => {
         })
       })
 
-      describe('PUT /api/users/{id}', () => {
+      describe('PUT /api/users/current', () => {
         describe('with a valid token', () => {
           it('should return an updated user', (done) => {
             server.inject({
               method: 'PUT',
-              url: `/api/users/${userModel.get('id')}`,
+              url: `/api/users/current`,
               headers: {
                 authorization: `Bearer ${token}`,
               },
@@ -233,7 +233,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PUT',
-              url: `/api/users/${userModel.get('id')}`,
+              url: `/api/users/current`,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -244,12 +244,12 @@ describe('Hapi Server', () => {
         })
       })
 
-      describe('DELETE /api/users/{id}', () => {
+      describe('DELETE /api/users/current', () => {
         describe('with a valid token', () => {
           it('should delete the user', (done) => {
             server.inject({
               method: 'DELETE',
-              url: `/api/users/${userModel.get('id')}`,
+              url: `/api/users/current`,
               headers: {
                 authorization: `Bearer ${token}`,
               },
@@ -266,7 +266,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'DELETE',
-              url: `/api/users/${userModel.get('id')}`,
+              url: `/api/users/current`,
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
