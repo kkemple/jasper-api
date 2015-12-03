@@ -101,7 +101,6 @@ describe('Hapi Server', () => {
             },
           }, (res) => {
             const payload = JSON.parse(res.payload)
-            console.log(payload)
 
             Joi.validate(payload, authSuccessSchema, (err) => {
               if (err) return done(err)
