@@ -35,10 +35,6 @@ describe('Hapi Server', () => {
           .get('/v2/query')
           .query(true)
           .reply(200, wolframResponse)
-
-        nock('https://api.mailgun.net/v3')
-          .post('/messages')
-          .reply(200, {})
       })
 
       after(() => {

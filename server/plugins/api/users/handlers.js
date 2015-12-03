@@ -13,7 +13,6 @@ const auth = {
 
 const mailer = nodemailer.createTransport(mg(auth))
 
-
 const sendMail = (messageConfig) => new Promise((res, rej) => {
   mailer.sendMail(messageConfig, (err, info) => {
     if (err) return rej(err)
