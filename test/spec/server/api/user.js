@@ -1,5 +1,6 @@
 import chai from 'chai'
 import Joi from 'joi'
+import nock from 'nock'
 
 import tokenize from '../../../../services/tokenize'
 import { authSuccessSchema, userGetSuccessSchema } from '../../../validations'
@@ -78,6 +79,50 @@ describe('Hapi Server', () => {
             const payload = JSON.parse(res.payload)
 
             payload.error.should.eq('AuthenticationError')
+            done()
+          })
+        })
+      })
+    })
+
+    describe('POST /api/pwreset', () => {
+      describe('with valid email and url', () => {
+        it('should return with a valid response', (done) => {
+          nock('https://api.mailgun.net/v2')
+            .post('/mg.releasable.io/messages')
+            .reply(200, {})
+
+          server.inject({
+            method: 'POST',
+            url: '/api/pwreset',
+            payload: {
+              email: userModel.get('email'),
+              url: 'http://testdomain.com/reset-password',
+            },
+          }, (res) => {
+            const payload = JSON.parse(res.payload)
+
+            Joi.validate(payload, authSuccessSchema, (err) => {
+              if (err) return done(err)
+              done()
+            })
+          })
+        })
+      })
+
+      describe('with invalid email and url', () => {
+        it('should return with an Error', (done) => {
+          server.inject({
+            method: 'POST',
+            url: '/api/pwreset',
+            payload: {
+              email: userModel.get('email'),
+              url: 'incorrect',
+            },
+          }, (res) => {
+            const payload = JSON.parse(res.payload)
+
+            payload.error.should.eq('Error')
             done()
           })
         })

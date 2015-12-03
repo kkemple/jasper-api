@@ -1,5 +1,38 @@
+import mg from 'nodemailer-mailgun-transport'
+import nodemailer from 'nodemailer'
+
 import tokenize from '../../../../services/tokenize'
 import { User } from '../../../../models'
+
+const auth = {
+  auth: {
+    api_key: process.env.MAILGUN_API_KEY,
+    domain: process.env.MAILGUN_DOMAIN,
+  },
+}
+
+const mailer = nodemailer.createTransport(mg(auth))
+
+
+const sendMail = (messageConfig) => new Promise((res, rej) => {
+  mailer.sendMail(messageConfig, (err, info) => {
+    if (err) return rej(err)
+    res(info)
+  })
+})
+
+const getEmailText = (url, token) => {
+  return `
+  Here is the link to reset your password!
+
+  ${url}?token=${encodeURIComponent(token)}
+
+  If you did not request this email please contact us at help@relesable.io
+
+  Cheers,
+  The Skynet Team
+  `
+}
 
 const deleteUser = (user) => {
   return user.archive()
@@ -25,6 +58,35 @@ export const authenticateHandler = (req, reply) => {
         timestamp: Date.now(),
       })
     })
+    .catch((err) => reply({
+      success: false,
+      error: err.name,
+      message: err.message,
+      stack: err.stack,
+      timestamp: Date.now(),
+    }))
+}
+
+export const passwordResetHandler = (req, reply) => {
+  const { email, url } = req.payload
+
+  new User({ email })
+    .fetch({ require: true })
+    .then((user) => tokenize(user))
+    .then((token) => {
+      const messageConfig = {
+        to: email,
+        from: 'no-reply@skynet.releasable.io',
+        subject: 'Skynet - Reset Password',
+        text: getEmailText(url, token),
+      }
+
+      return sendMail(messageConfig)
+    })
+    .then(() => reply({
+      success: true,
+      timestamp: Date.now(),
+    }))
     .catch((err) => reply({
       success: false,
       error: err.name,

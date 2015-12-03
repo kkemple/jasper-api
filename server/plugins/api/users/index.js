@@ -3,18 +3,31 @@ import {
   createUserHandler,
   deleteUserHandler,
   getUserHandler,
+  passwordResetHandler,
   patchUserHandler,
   putUserHandler,
 } from './handlers'
 
 import {
   authenticationPayload,
+  passwordResetPayload,
   userPostPayload,
   userParams,
 } from '../../../../validations'
 
 export const register = (server, options, next) => {
   server.route([
+    {
+      method: 'POST',
+      path: '/api/pwreset',
+      config: {
+        auth: false,
+        validate: {
+          payload: passwordResetPayload,
+        },
+        handler: passwordResetHandler,
+      },
+    },
     {
       method: 'POST',
       path: '/api/authenticate',

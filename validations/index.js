@@ -16,6 +16,11 @@ export const authenticationPayload = {
   password: Joi.string().regex(/[a-zA-Z0-9@-_]{3,30}/).required(),
 }
 
+export const resetPasswordPayload = {
+  email: Joi.string().email().required(),
+  url: Joi.string().required(),
+}
+
 export const userPostPayload = {
   email: Joi.string().email().required(),
   password: Joi.string().regex(/[a-zA-Z0-9@-_]{3,30}/).required(),
