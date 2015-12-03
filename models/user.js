@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import Joi from 'joi'
 import Promise from 'bluebird'
 
+import hash from '../services/hash'
 import orm from '../db'
 import { AuthenticationError } from '../errors'
 import { userValidation } from '../validations'
@@ -37,8 +38,8 @@ const archiveDependencies = (model) => {
   ]))
 }
 
-const validate = (model, attrs) => {
-  return Joi.validate(attrs, userValidation)
+const validate = (model) => {
+  return Joi.validate(model.attributes, userValidation)
 }
 
 const comparePassword = (password, user) => new Promise((res, rej) => {
@@ -52,26 +53,17 @@ const comparePassword = (password, user) => new Promise((res, rej) => {
   })
 })
 
-const hashPassword = (model) => new Promise((res, rej) => {
-  bcrypt.genSalt(10, (saltGenErr, salt) => {
-    if (saltGenErr) return rej(saltGenErr)
-
-    bcrypt.hash(model.get('password'), salt, (hashErr, hash) => {
-      if (hashErr) return rej(hashErr)
-
-      model.set('password', hash)
-      return res()
-    })
-  })
-})
-
-const convertPassword = (model) => {
-  if (model.hasChanged('password') || model.isNew()) {
-    return hashPassword(model)
+const convertPassword = (model) => new Promise((res, rej) => {
+  if (!model.hasChanged('password') || !model.isNew()) {
+    res()
+    return
   }
 
-  return Promise.resolve()
-}
+  hash(model.get('password'))
+    .then((password) => model.set({ password }))
+    .then(() => res())
+    .catch((err) => rej(err))
+})
 
 const buildProfile = (user, bots) => {
   return assign({}, user.omit(['password', 'stripe_id']), {
@@ -85,10 +77,9 @@ const config = {
   hasTimestamps: true,
 
   initialize() {
-    this.on('creating', convertPassword)
-    this.on('saving', convertPassword)
-    this.on('destroying', destroyDependencies)
-    this.on('saving', validate)
+    this.on('creating', (model) => convertPassword(model))
+    this.on('destroying', (model) => destroyDependencies(model))
+    this.on('saving', (model) => validate(model))
   },
 
   activeTokens() {

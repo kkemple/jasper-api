@@ -1,6 +1,8 @@
+import assign from 'lodash.assign'
 import mg from 'nodemailer-mailgun-transport'
 import nodemailer from 'nodemailer'
 
+import hash from '../../../../services/hash'
 import tokenize from '../../../../services/tokenize'
 import { User } from '../../../../models'
 
@@ -38,11 +40,19 @@ const deleteUser = (user) => {
 }
 
 const patchUser = (user, payload) => {
-  return user.save(payload, { patch: true })
+  if (!payload.password) return user.save(payload, { patch: true })
+
+  return hash(payload.password)
+    .then((hashed) => assign({}, payload, { password: hashed }))
+    .then((data) => user.save(data, { patch: true }))
 }
 
 const putUser = (user, payload) => {
-  return user.save(payload)
+  if (!payload.password) return user.save(payload)
+
+  return hash(payload.password)
+    .then((hashed) => assign({}, payload, { password: hashed }))
+    .then((data) => user.save(data))
 }
 
 export const authenticateHandler = (req, reply) => {
