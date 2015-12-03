@@ -86,7 +86,7 @@ const config = {
 
   initialize() {
     this.on('creating', convertPassword)
-    this.on('updating', convertPassword)
+    this.on('saving', convertPassword)
     this.on('destroying', destroyDependencies)
     this.on('saving', validate)
   },
