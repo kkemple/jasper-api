@@ -28,7 +28,7 @@ describe('Services', () => {
     it('creates a JWT for a user', (done) => {
       tokenize(user)
         .then((token) => {
-          jwt.verify(token, process.env.ENCRYPTION_KEY, (err, decoded) => {
+          jwt.verify(token, process.env.SECRET, (err, decoded) => {
             decoded.id.should.eq(user.get('id'))
             decoded.email.should.eq(user.get('email'))
             done()
@@ -40,8 +40,8 @@ describe('Services', () => {
     it('persists the token for future validations', (done) => {
       tokenize(user)
         .then((token) => {
-          jwt.verify(token, process.env.ENCRYPTION_KEY, (err, decoded) => {
-            new Token({ uuid: decoded.uuid })
+          jwt.verify(token, process.env.SECRET, (err, decoded) => {
+            new Token({ cuid: decoded.cuid })
               .fetch({ require: true })
               .then(() => done())
               .catch(done)

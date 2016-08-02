@@ -27,8 +27,8 @@ describe('Hapi Server', () => {
             result: {
               speech: 'test',
               action: 'smalltalk.greetings',
-              parameters: {},
-            },
+              parameters: {}
+            }
           })
 
         nock('http://api.wolframalpha.com')
@@ -51,8 +51,8 @@ describe('Hapi Server', () => {
           url: '/slack/messages',
           payload: {
             text: '20% tip 66 dollars',
-            token: process.env.SLACK_VERIFICATION_TOKEN,
-          },
+            token: process.env.SLACK_VERIFICATION_TOKEN
+          }
         }, (res) => {
           const payload = JSON.parse(res.payload)
           payload.text.should.eq('I was unable to process that request')

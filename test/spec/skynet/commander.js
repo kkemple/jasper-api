@@ -1,11 +1,11 @@
 import chai from 'chai'
-import Promise from 'bluebird'
 
-import Commander from '../../../skynet/commander'
+
+import Commander from '../../../jasper/commander'
 
 chai.should()
 
-describe('Skynet', () => {
+describe('jasper', () => {
   describe('Commander', () => {
     describe('#constructor', () => {
       it('should process api.ai response', () => {
@@ -13,7 +13,7 @@ describe('Skynet', () => {
           action: 'smalltalk.greetings',
           speech: 'test',
           params: {},
-          resolvedQuery: 'this is my command',
+          resolvedQuery: 'this is my command'
         }
 
         const commander = new Commander(response)
@@ -31,15 +31,15 @@ describe('Skynet', () => {
             action: 'smalltalk.greetings',
             speech: 'test',
             params: {},
-            resolvedQuery: 'this is my command',
+            resolvedQuery: 'this is my command'
           }
 
           const domains = {
             smalltalk: {
-              greetings(speech, params, resolvedQuery) {
+              greetings (speech, params, resolvedQuery) {
                 return Promise.resolve({ speech, params, resolvedQuery })
-              },
-            },
+              }
+            }
           }
 
           const commander = new Commander(response)
@@ -59,15 +59,15 @@ describe('Skynet', () => {
             action: 'unknown.action',
             speech: 'test',
             params: {},
-            resolvedQuery: 'this is my command',
+            resolvedQuery: 'this is my command'
           }
 
           const domains = {
             smalltalk: {
-              greetings(speech, params, resolvedQuery) {
+              greetings (speech, params, resolvedQuery) {
                 return Promise.resolve({ speech, params, resolvedQuery })
-              },
-            },
+              }
+            }
           }
 
           const commander = new Commander(response)

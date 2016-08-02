@@ -4,7 +4,7 @@ import Joi from 'joi'
 import tokenize from '../../../../services/tokenize'
 import {
   emailGetSuccessSchema,
-  emailsGetSuccessSchema,
+  emailsGetSuccessSchema
 } from '../../../validations'
 import { User, Bot, Email } from '../../../../models'
 import { userConfig, botConfig, emailConfig } from '../../../helpers/config'
@@ -74,8 +74,8 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: emailsUrl,
               headers: {
-                authorization: `Bearer ${token}`,
-              },
+                authorization: `Bearer ${token}`
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -91,7 +91,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'GET',
-              url: emailUrl,
+              url: emailUrl
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -109,8 +109,8 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: emailUrl,
               headers: {
-                authorization: `Bearer ${token}`,
-              },
+                authorization: `Bearer ${token}`
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -126,7 +126,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'GET',
-              url: emailUrl,
+              url: emailUrl
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -144,11 +144,11 @@ describe('Hapi Server', () => {
               method: 'POST',
               url: emailsUrl,
               payload: {
-                email: 'test@releasable.io',
+                email: 'test@releasable.io'
               },
               headers: {
-                authorization: `Bearer ${token}`,
-              },
+                authorization: `Bearer ${token}`
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -164,7 +164,7 @@ describe('Hapi Server', () => {
           it('should return with a Bad Request', (done) => {
             server.inject({
               method: 'POST',
-              url: emailsUrl,
+              url: emailsUrl
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -182,11 +182,11 @@ describe('Hapi Server', () => {
               method: 'PATCH',
               url: emailUrl,
               headers: {
-                authorization: `Bearer ${token}`,
+                authorization: `Bearer ${token}`
               },
               payload: {
-                email: 'test@releasable.io',
-              },
+                email: 'test@releasable.io'
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -204,7 +204,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PATCH',
-              url: emailUrl,
+              url: emailUrl
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -222,11 +222,11 @@ describe('Hapi Server', () => {
               method: 'PUT',
               url: emailUrl,
               headers: {
-                authorization: `Bearer ${token}`,
+                authorization: `Bearer ${token}`
               },
               payload: {
-                email: 'test@releasable.io',
-              },
+                email: 'test@releasable.io'
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
               payload.payload.email.email.should.eq('test@releasable.io')
@@ -243,7 +243,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PUT',
-              url: emailUrl,
+              url: emailUrl
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -261,8 +261,8 @@ describe('Hapi Server', () => {
               method: 'DELETE',
               url: emailUrl,
               headers: {
-                authorization: `Bearer ${token}`,
-              },
+                authorization: `Bearer ${token}`
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
               payload.success.should.eq(true)
@@ -275,7 +275,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'DELETE',
-              url: emailUrl,
+              url: emailUrl
             }, (res) => {
               const payload = JSON.parse(res.payload)
 

@@ -1,0 +1,51 @@
+version: '2'
+services:
+  api:
+    build: .
+    dockerfile: Dockerfile-test
+    ports:
+      - 2029:80
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - cache
+      - db
+      - statsd
+    links:
+      - cache
+      - db
+      - statsd
+    env_file: .env
+    environment:
+      - DATABASE_NAME=test
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_USER=root
+      - DATABASE_ACCESS_KEY=test
+      - NODE_ENV=compose
+      - REDIS_HOST=cache
+      - REDIS_PARTITION=jasper
+      - REDIS_PORT=6379
+      - SECRET=secret
+      - STATSD_HOST=statsd
+
+  cache:
+    expose:
+      - 6379
+    image: redis:latest
+
+  db:
+    environment:
+      - POSTGRES_DB=test
+      - POSTGRES_PASSWORD=test
+    expose:
+      - 5432
+    image: postgres:latest
+
+  statsd:
+    expose:
+      - 80
+      - 8125/udp
+      - 8126
+    image: hopsoft/graphite-statsd:latest
+    restart: always

@@ -1,6 +1,6 @@
 import chai from 'chai'
 import nock from 'nock'
-import Promise from 'bluebird'
+
 
 import wolframAlpha from '../../../wolfram-alpha'
 import { wolframAlphaData } from '../../fixtures'

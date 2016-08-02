@@ -53,8 +53,8 @@ describe('Hapi Server', () => {
             url: '/api/authenticate',
             payload: {
               email: userModel.get('email'),
-              password: 'test',
-            },
+              password: 'test'
+            }
           }, (res) => {
             const payload = JSON.parse(res.payload)
 
@@ -73,8 +73,8 @@ describe('Hapi Server', () => {
             url: '/api/authenticate',
             payload: {
               email: userModel.get('email'),
-              password: 'incorrect',
-            },
+              password: 'incorrect'
+            }
           }, (res) => {
             const payload = JSON.parse(res.payload)
 
@@ -97,8 +97,8 @@ describe('Hapi Server', () => {
             url: '/api/pwreset',
             payload: {
               email: userModel.get('email'),
-              url: 'http://testdomain.com/reset-password',
-            },
+              url: 'http://testdomain.com/reset-password'
+            }
           }, (res) => {
             const payload = JSON.parse(res.payload)
 
@@ -117,8 +117,8 @@ describe('Hapi Server', () => {
             url: '/api/pwreset',
             payload: {
               email: userModel.get('email'),
-              url: 'incorrect',
-            },
+              url: 'incorrect'
+            }
           }, (res) => {
             const payload = JSON.parse(res.payload)
 
@@ -137,8 +137,8 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: '/api/users/current',
               headers: {
-                authorization: `Bearer ${token}`,
-              },
+                authorization: `Bearer ${token}`
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -154,7 +154,7 @@ describe('Hapi Server', () => {
           it('should return with Not Found Error', (done) => {
             server.inject({
               method: 'GET',
-              url: '/api/users/current',
+              url: '/api/users/current'
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -170,13 +170,13 @@ describe('Hapi Server', () => {
           it('should return an updated user', (done) => {
             server.inject({
               method: 'PATCH',
-              url: `/api/users/current`,
+              url: '/api/users/current',
               headers: {
-                authorization: `Bearer ${token}`,
+                authorization: `Bearer ${token}`
               },
               payload: {
-                email: 'test@releasable.io',
-              },
+                email: 'test@releasable.io'
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
               payload.payload.user.email.should.eq('test@releasable.io')
@@ -193,7 +193,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PATCH',
-              url: `/api/users/current`,
+              url: '/api/users/current'
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -209,14 +209,14 @@ describe('Hapi Server', () => {
           it('should return an updated user', (done) => {
             server.inject({
               method: 'PUT',
-              url: `/api/users/current`,
+              url: '/api/users/current',
               headers: {
-                authorization: `Bearer ${token}`,
+                authorization: `Bearer ${token}`
               },
               payload: {
                 email: 'test@releasable.io',
-                password: 'test',
-              },
+                password: 'test'
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
               payload.payload.user.email.should.eq('test@releasable.io')
@@ -233,7 +233,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PUT',
-              url: `/api/users/current`,
+              url: '/api/users/current'
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -249,10 +249,10 @@ describe('Hapi Server', () => {
           it('should delete the user', (done) => {
             server.inject({
               method: 'DELETE',
-              url: `/api/users/current`,
+              url: '/api/users/current',
               headers: {
-                authorization: `Bearer ${token}`,
-              },
+                authorization: `Bearer ${token}`
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -266,7 +266,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'DELETE',
-              url: `/api/users/current`,
+              url: '/api/users/current'
             }, (res) => {
               const payload = JSON.parse(res.payload)
 

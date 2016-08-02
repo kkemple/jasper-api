@@ -7,8 +7,8 @@ export const authSuccessSchema = {
   success: Joi.boolean().invalid(false).required(),
   timestamp: Joi.date().required(),
   payload: {
-    token: Joi.string().required(),
-  },
+    token: Joi.string().required()
+  }
 }
 
 export const userGetSuccessSchema = {
@@ -30,11 +30,11 @@ export const userGetSuccessSchema = {
           name: Joi.string().required(),
           extra_data: Joi.string().allow(null).allow(''),
           created_at: Joi.date().required(),
-          updated_at: Joi.date().required(),
+          updated_at: Joi.date().required()
         })
-      ),
-    }),
-  }),
+      )
+    })
+  })
 }
 
 export const botGetSuccessSchema = {
@@ -51,9 +51,9 @@ export const botGetSuccessSchema = {
       updated_at: Joi.date().required(),
       integrations: Joi.array(),
       emails: Joi.array(),
-      phone_numbers: Joi.array(),
-    }),
-  }),
+      phone_numbers: Joi.array()
+    })
+  })
 }
 
 export const botsGetSuccessSchema = {
@@ -71,10 +71,10 @@ export const botsGetSuccessSchema = {
         updated_at: Joi.date().required(),
         integrations: Joi.array(),
         emails: Joi.array(),
-        phone_numbers: Joi.array(),
+        phone_numbers: Joi.array()
       })
-    ),
-  }),
+    )
+  })
 }
 
 export const integrationGetSuccessSchema = {
@@ -91,9 +91,9 @@ export const integrationGetSuccessSchema = {
       refresh_token: Joi.string(),
       extra_data: Joi.string().allow(null).allow(''),
       created_at: Joi.date().required(),
-      updated_at: Joi.date().required(),
-    }),
-  }),
+      updated_at: Joi.date().required()
+    })
+  })
 }
 
 export const integrationsGetSuccessSchema = {
@@ -111,10 +111,10 @@ export const integrationsGetSuccessSchema = {
         refresh_token: Joi.string(),
         extra_data: Joi.string().allow(null).allow(''),
         created_at: Joi.date().required(),
-        updated_at: Joi.date().required(),
+        updated_at: Joi.date().required()
       })
-    ),
-  }),
+    )
+  })
 }
 
 export const emailGetSuccessSchema = {
@@ -128,9 +128,9 @@ export const emailGetSuccessSchema = {
       active: Joi.boolean().required(),
       extra_data: Joi.string().allow(null).allow(''),
       created_at: Joi.date().required(),
-      updated_at: Joi.date().required(),
-    }),
-  }),
+      updated_at: Joi.date().required()
+    })
+  })
 }
 
 export const emailsGetSuccessSchema = {
@@ -145,10 +145,10 @@ export const emailsGetSuccessSchema = {
         active: Joi.boolean().required(),
         extra_data: Joi.string().allow(null).allow(''),
         created_at: Joi.date().required(),
-        updated_at: Joi.date().required(),
+        updated_at: Joi.date().required()
       })
-    ),
-  }),
+    )
+  })
 }
 
 export const phoneNumberGetSuccessSchema = {
@@ -162,9 +162,9 @@ export const phoneNumberGetSuccessSchema = {
       active: Joi.boolean().required(),
       extra_data: Joi.string().allow(null).allow(''),
       created_at: Joi.date().required(),
-      updated_at: Joi.date().required(),
-    }),
-  }),
+      updated_at: Joi.date().required()
+    })
+  })
 }
 
 export const phoneNumbersGetSuccessSchema = {
@@ -179,8 +179,8 @@ export const phoneNumbersGetSuccessSchema = {
         active: Joi.boolean().required(),
         extra_data: Joi.string().allow(null).allow(''),
         created_at: Joi.date().required(),
-        updated_at: Joi.date().required(),
+        updated_at: Joi.date().required()
       })
-    ),
-  }),
+    )
+  })
 }

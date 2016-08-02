@@ -4,7 +4,7 @@ import Joi from 'joi'
 import tokenize from '../../../../services/tokenize'
 import {
   phoneNumberGetSuccessSchema,
-  phoneNumbersGetSuccessSchema,
+  phoneNumbersGetSuccessSchema
 } from '../../../validations'
 import { User, Bot, PhoneNumber } from '../../../../models'
 import { userConfig, botConfig, phoneNumberConfig } from '../../../helpers/config'
@@ -74,8 +74,8 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: phoneNumbersUrl,
               headers: {
-                authorization: `Bearer ${token}`,
-              },
+                authorization: `Bearer ${token}`
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -91,7 +91,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'GET',
-              url: phoneNumberUrl,
+              url: phoneNumberUrl
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -109,8 +109,8 @@ describe('Hapi Server', () => {
               method: 'GET',
               url: phoneNumberUrl,
               headers: {
-                authorization: `Bearer ${token}`,
-              },
+                authorization: `Bearer ${token}`
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -126,7 +126,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'GET',
-              url: phoneNumberUrl,
+              url: phoneNumberUrl
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -144,11 +144,11 @@ describe('Hapi Server', () => {
               method: 'POST',
               url: phoneNumbersUrl,
               payload: {
-                phone_number: '+15555555555',
+                phone_number: '+15555555555'
               },
               headers: {
-                authorization: `Bearer ${token}`,
-              },
+                authorization: `Bearer ${token}`
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -164,7 +164,7 @@ describe('Hapi Server', () => {
           it('should return with a Bad Request', (done) => {
             server.inject({
               method: 'POST',
-              url: phoneNumbersUrl,
+              url: phoneNumbersUrl
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -182,11 +182,11 @@ describe('Hapi Server', () => {
               method: 'PATCH',
               url: phoneNumberUrl,
               headers: {
-                authorization: `Bearer ${token}`,
+                authorization: `Bearer ${token}`
               },
               payload: {
-                phone_number: '+15555555556',
-              },
+                phone_number: '+15555555556'
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -204,7 +204,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PATCH',
-              url: phoneNumberUrl,
+              url: phoneNumberUrl
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -222,11 +222,11 @@ describe('Hapi Server', () => {
               method: 'PUT',
               url: phoneNumberUrl,
               headers: {
-                authorization: `Bearer ${token}`,
+                authorization: `Bearer ${token}`
               },
               payload: {
-                phone_number: '+15555555556',
-              },
+                phone_number: '+15555555556'
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
               payload.payload.phone_number.phone_number.should.eq('+15555555556')
@@ -243,7 +243,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'PUT',
-              url: phoneNumberUrl,
+              url: phoneNumberUrl
             }, (res) => {
               const payload = JSON.parse(res.payload)
 
@@ -261,8 +261,8 @@ describe('Hapi Server', () => {
               method: 'DELETE',
               url: phoneNumberUrl,
               headers: {
-                authorization: `Bearer ${token}`,
-              },
+                authorization: `Bearer ${token}`
+              }
             }, (res) => {
               const payload = JSON.parse(res.payload)
               payload.success.should.eq(true)
@@ -275,7 +275,7 @@ describe('Hapi Server', () => {
           it('should return with Unauthorized Error', (done) => {
             server.inject({
               method: 'DELETE',
-              url: phoneNumberUrl,
+              url: phoneNumberUrl
             }, (res) => {
               const payload = JSON.parse(res.payload)
 

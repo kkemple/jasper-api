@@ -22,7 +22,7 @@ describe('Hapi Server', () => {
       .catch((err) => done(err))
   })
 
-  describe('Skynet Plugin', () => {
+  describe('jasper Plugin', () => {
     let userModel
     let botModel
     let token
@@ -34,8 +34,8 @@ describe('Hapi Server', () => {
           result: {
             speech: 'test',
             action: 'smalltalk.greetings',
-            parameters: {},
-          },
+            parameters: {}
+          }
         })
 
       nock('http://api.wolframalpha.com')
@@ -69,17 +69,17 @@ describe('Hapi Server', () => {
         .catch(done)
     })
 
-    describe('POST /api/bots/{botId}/skynet', () => {
+    describe('POST /api/bots/{botId}/jasper', () => {
       it('should return with a valid response', (done) => {
         server.inject({
           method: 'POST',
-          url: `/api/bots/${botModel.get('id')}/skynet`,
+          url: `/api/bots/${botModel.get('id')}/jasper`,
           headers: {
-            authorization: `Bearer ${token}`,
+            authorization: `Bearer ${token}`
           },
           payload: {
-            query: '20% tip 66 dollars',
-          },
+            query: '20% tip 66 dollars'
+          }
         }, (res) => {
           const payload = JSON.parse(res.payload)
           payload.payload.text.should.eq('I was unable to process that request')
@@ -89,14 +89,14 @@ describe('Hapi Server', () => {
       })
     })
 
-    describe('GET /api/bots/{botId}/skynet', () => {
+    describe('GET /api/bots/{botId}/jasper', () => {
       it('should return with a valid response', (done) => {
         server.inject({
           method: 'GET',
-          url: `/api/bots/${botModel.get('id')}/skynet?q=20% tip 66 dollars`,
+          url: `/api/bots/${botModel.get('id')}/jasper?q=20% tip 66 dollars`,
           headers: {
-            authorization: `Bearer ${token}`,
-          },
+            authorization: `Bearer ${token}`
+          }
         }, (res) => {
           const payload = JSON.parse(res.payload)
           payload.payload.text.should.eq('I was unable to process that request')

@@ -28,7 +28,7 @@ describe('Hapi Server', () => {
       const data = {
         access_token: 'access_token',
         refresh_token: 'refresh_token',
-        expires_in: 2029,
+        expires_in: 2029
       }
 
       before((done) => {
@@ -70,11 +70,11 @@ describe('Hapi Server', () => {
             code: 'code',
             redirect_uri: 'redirect_uri',
             user_id: userModel.get('id'),
-            bot_id: botModel.get('id'),
+            bot_id: botModel.get('id')
           },
           headers: {
-            authorization: `Bearer ${token}`,
-          },
+            authorization: `Bearer ${token}`
+          }
         }, (res) => {
           const payload = JSON.parse(res.payload)
           payload.access_token.should.eq(data.access_token)

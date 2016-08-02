@@ -27,8 +27,8 @@ describe('Hapi Server', () => {
             result: {
               speech: 'test',
               action: 'smalltalk.greetings',
-              parameters: {},
-            },
+              parameters: {}
+            }
           })
 
         nock('http://api.wolframalpha.com')
@@ -48,8 +48,8 @@ describe('Hapi Server', () => {
           payload: {
             Body: '20% tip 66 dollars',
             To: 'test@releasable.io',
-            From: 'Test User <testuser@releasable.io>',
-          },
+            From: 'Test User <testuser@releasable.io>'
+          }
         }, (res) => {
           res.payload.should.eq('ok')
           done()
