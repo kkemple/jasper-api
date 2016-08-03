@@ -83,9 +83,9 @@ const config = {
     const today = new Date()
     const thirtyDays = new Date().setDate(today.getDate() - 30)
 
-    return this.hasMany('Token').query((queryBuilder) => {
-      queryBuilder.where('last_updated', '>', thirtyDays)
-    })
+    return this.hasMany('Token')
+      .query((queryBuilder) =>
+        queryBuilder.where('last_updated', '>', thirtyDays))
   },
 
   tokens () {

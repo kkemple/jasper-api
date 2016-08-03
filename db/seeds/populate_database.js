@@ -1,10 +1,11 @@
 var timestamp = new Date()
 
-exports.seed = function (knex, Promise) {
+exports.seed = function (knex) {
   return knex('integrations').del()
     .then(() => knex('phone_numbers').del())
     .then(() => knex('emails').del())
     .then(() => knex('bots').del())
+    .then(() => knex('tokens').del())
     .then(() => knex('users').del())
     .then(() =>
       knex('users').insert({

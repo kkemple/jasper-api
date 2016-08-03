@@ -1,37 +1,34 @@
-import test from 'tape'
+import test from 'ava'
 
 import { excavate, find } from './index'
-import { wolframAlphaData } from '../wolfram-alpha/fixtures'
 
-test('Archeologist#find(path, json)', (assert) => {
+test('#find(path, json)', (t) => {
   const expected = 'test'
   const actual = find('test', { test: 'test' })
 
-  assert.equal(expected, actual, '')
-  assert.end()
+  t.is(expected, actual)
 })
 
-test('Archeologist#excavate(xml)', (t) => {
-  t.test('should return a promise', (assert) => {
-    const expected = true
-    const actual = excavate() instanceof Promise
+test('#excavate(xml) resolves with parsed json', (t) => {
+  const expected = true
 
-    assert.equal(expected, actual, 'return value of excavate() is a promise')
-    assert.end()
-  })
+  const wolframAlphaData = '' +
+    '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<queryresult success="true">\n' +
+      '<pod title="Result">\n' +
+        '<subpod>\n' +
+          '<plaintext>Test</plaintext>\n' +
+          '<img src="http://some.url/and/image/path.jpg" />\n' +
+        '</subpod>\n' +
+      '</pod>\n' +
+    '</queryresult>'
 
-  t.test('should resolve with parsed json', (assert) => {
-    const expected = true
-
-    excavate(wolframAlphaData)
-      .then((json) => {
-        const actual = !!json['queryresult']
-        assert.equal(expected, actual, 'xml properly converted to JSON')
-        assert.end()
-      })
-      .catch((error) => {
-        assert.fail(error)
-        assert.end()
-      })
-  })
+  return excavate(wolframAlphaData)
+    .then((json) => {
+      const actual = !!json['queryresult']
+      t.is(expected, actual)
+    })
+    .catch((error) => {
+      t.fail(error)
+    })
 })

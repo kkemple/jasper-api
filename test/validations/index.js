@@ -37,46 +37,6 @@ export const userGetSuccessSchema = {
   })
 }
 
-export const botGetSuccessSchema = {
-  success: Joi.boolean().invalid(false).required(),
-  timestamp: Joi.date().required(),
-  payload: Joi.object().keys({
-    bot: Joi.object().keys({
-      id: Joi.number().required(),
-      user_id: Joi.number().required(),
-      active: Joi.boolean().required(),
-      name: Joi.string().required(),
-      extra_data: Joi.string().allow(null).allow(''),
-      created_at: Joi.date().required(),
-      updated_at: Joi.date().required(),
-      integrations: Joi.array(),
-      emails: Joi.array(),
-      phone_numbers: Joi.array()
-    })
-  })
-}
-
-export const botsGetSuccessSchema = {
-  success: Joi.boolean().invalid(false).required(),
-  timestamp: Joi.date().required(),
-  payload: Joi.object().keys({
-    bots: Joi.array().items(
-      Joi.object().keys({
-        id: Joi.number().required(),
-        user_id: Joi.number().required(),
-        active: Joi.boolean().required(),
-        name: Joi.string().required(),
-        extra_data: Joi.string().allow(null).allow(''),
-        created_at: Joi.date().required(),
-        updated_at: Joi.date().required(),
-        integrations: Joi.array(),
-        emails: Joi.array(),
-        phone_numbers: Joi.array()
-      })
-    )
-  })
-}
-
 export const integrationGetSuccessSchema = {
   success: Joi.boolean().invalid(false).required(),
   timestamp: Joi.date().required(),

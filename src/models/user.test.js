@@ -1,48 +1,61 @@
-import test from 'tape'
+import test from 'ava'
 
+import './token'
+import './bot'
 import UserModel from './user'
 
-test('User', (t) => {
-  t.test('authenticate(email, password)', (assert) => {
-    assert.test('with a valid email and password', () => {
-      UserModel.forge({ email: 'jasper@jasperdoes.xyz', password: 'test' })
-        .save()
-        .then((user) => {
-          const expected = user
-          UserModel.authenticate('jasper@jasperdoes.xyz', 'test')
-            .then((authedUser) => {
-              const actual = authedUser
-              assert.equal(expected, actual, 'returns authenticated user')
-            })
-            .then(() => user.destroy())
-            .then(() => assert.end())
-        })
-        .catch((error) => {
-          assert.fail(error)
-          assert.end()
-        })
-    })
-  })
-
-  t.test('with an invalid email', (assert) => {
-    UserModel.forge({ email: 'jasper@jasper.xyz', password: 'test' })
+test('authentication with valid creds', (t) => {
+  return new Promise((resolve, reject) => {
+    UserModel
+      .forge({ email: 'test@jasperdoes.xyz', password: 'test' })
       .save()
       .then((user) => {
-        UserModel.authenticate('jasper@jasperdoes.xyz', 'test')
+        const expected = user.get('id')
+
+        UserModel
+          .authenticate('test@jasperdoes.xyz', 'test')
+          .then((authedUser) => {
+            const actual = authedUser.get('id')
+            t.is(expected, actual)
+          })
+          .then(() => user.tokens().invokeThen('destroy'))
+          .then(() => user.destroy())
+          .then(() => resolve())
+          .catch((error) => reject(error))
+      })
+      .catch((error) => reject(error))
+  })
+})
+
+test('authentication with invalid creds', (t) => {
+  let userModel
+  return new Promise((resolve, reject) => {
+    UserModel
+      .forge({ email: 'test@jasper.xyz', password: 'test' })
+      .save()
+      .then((user) => {
+        userModel = user
+
+        UserModel
+          .authenticate('test@jasperdoes.xyz', 'wrong')
           .then(() => {
-            assert.fail('user should not be authenticated with incorrect email')
-            assert.end()
+            t.fail('user should not be authenticated with incorrect email')
+            resolve()
           })
           .catch((error) => {
             if (error.message === 'User not found!') {
-              assert.pass('fails with "User not found" error')
-              assert.end()
+              t.pass('fails with "User not found" error')
             }
+
+            const promises = [
+              userModel.tokens().invokeThen('destroy'),
+              userModel.destroy()
+            ]
+
+            Promise.all(promises)
+              .then(() => resolve())
+              .catch((error) => reject(error))
           })
-      })
-      .catch((error) => {
-        assert.fail(error)
-        assert.end()
       })
   })
 })

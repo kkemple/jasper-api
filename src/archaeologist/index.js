@@ -12,7 +12,7 @@ const parseEmpty = (str) => {
   return str
 }
 
-export const find = (artifact, source) => {
+export function find(artifact, source) {
   const scrubbedArtifact = artifact
     .replace(/\[(\w+)\]/g, '.$1')
     .replace(/^\./, '')
@@ -25,16 +25,16 @@ export const find = (artifact, source) => {
   )
 }
 
-export const excavate = (xml) => {
+export function excavate(xml) {
   return new Promise((resolve, reject) => {
     parseString(xml, {
       trim: true,
       explicitArray: true,
       attrValueProcessors: [parseEmpty, parseNumbers, parseBooleans],
       valueProcessors: [parseEmpty, parseNumbers, parseBooleans]
-    }, (err, result) => {
-      if (err) {
-        reject(err)
+    }, (error, result) => {
+      if (error) {
+        reject(error)
         return
       }
 

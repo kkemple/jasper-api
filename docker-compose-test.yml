@@ -1,40 +1,40 @@
 version: '2'
 services:
-  api:
+  jasper-api-test:
     build: .
-    dockerfile: Dockerfile-test
+    command: npm run test:watch
     ports:
-      - 2029:80
+      - 3000:3000
     volumes:
       - .:/usr/src/app
     depends_on:
-      - cache
-      - db
-      - statsd
+      - cache-test
+      - db-test
+      - statsd-test
     links:
-      - cache
-      - db
-      - statsd
+      - cache-test
+      - db-test
+      - statsd-test
     env_file: .env
     environment:
       - DATABASE_NAME=test
-      - DATABASE_HOST=db
+      - DATABASE_HOST=db-test
       - DATABASE_PORT=5432
-      - DATABASE_USER=root
+      - DATABASE_USER=postgres
       - DATABASE_ACCESS_KEY=test
-      - NODE_ENV=compose
-      - REDIS_HOST=cache
-      - REDIS_PARTITION=jasper
+      - NODE_ENV=test
+      - REDIS_HOST=cache-test
+      - REDIS_PARTITION=test
       - REDIS_PORT=6379
       - SECRET=secret
-      - STATSD_HOST=statsd
+      - STATSD_HOST=statsd-test
 
-  cache:
+  cache-test:
     expose:
       - 6379
     image: redis:latest
 
-  db:
+  db-test:
     environment:
       - POSTGRES_DB=test
       - POSTGRES_PASSWORD=test
@@ -42,7 +42,7 @@ services:
       - 5432
     image: postgres:latest
 
-  statsd:
+  statsd-test:
     expose:
       - 80
       - 8125/udp

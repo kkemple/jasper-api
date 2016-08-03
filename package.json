@@ -20,10 +20,11 @@
     "package": "npm shrinkwrap --dev && node bin/fix-shrinkwrap && shrinkpack",
     "pretest": "npm run lint",
     "pretest:unit": "npm run lint",
-    "start": "npm run db:migrate && npm run db:seed:all && node lib/index.js",
-    "test": "npm run db:migrate && npm run db:seed:all && istanbul cover tape -- -r babel-register \"src/**/*.test.js\"",
+    "start": "npm run db:migrate:run && npm run db:seed:all && node lib/index.js",
+    "test": "npm run db:migrate:run && npm run db:seed:run && istanbul cover ava",
+    "test:watch": "npm run db:migrate:run && npm run db:seed:run && istanbul cover ava -- --watch",
     "test:coverage": "npm run test && codeclimate-test-reporter < coverage/lcov.info",
-    "test:unit": "tape -r babel-register \"src/**/*.unit.test.js\""
+    "test:unit": "ava -- --match \"*.unit.test.js\""
   },
   "repository": {
     "type": "git",
@@ -71,11 +72,13 @@
     "pino": "^2.7.5",
     "randomstring": "^1.1.3",
     "redis": "^2.3.1",
+    "spotify-web-api-node": "^2.3.5",
     "twilio": "^2.5.1",
     "vision": "^4.1.0",
     "xml2js": "^0.4.15"
   },
   "devDependencies": {
+    "ava": "^0.15.2",
     "babel-cli": "^6.11.4",
     "babel-preset-es2015": "^6.0.14",
     "babel-register": "^6.11.6",
@@ -87,10 +90,20 @@
     "rimraf": "^2.5.4",
     "shrinkpack": "^0.13.1",
     "sinon": "^1.17.1",
-    "standard": "^7.1.2",
-    "tape": "^4.6.0"
+    "standard": "^7.1.2"
   },
   "optionalDependencies": {
     "fsevents": "^1.0.0"
+  },
+  "ava": {
+    "files": [
+      "src/**/*.test.js"
+    ],
+    "failFast": true,
+    "tap": true,
+    "babel": "inherit",
+    "require": [
+      "babel-register"
+    ]
   }
 }
